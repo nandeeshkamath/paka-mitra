@@ -14,3 +14,16 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## ToDo
+
+- Add ability to persist
+- Persist ingredients
+- Persist recipe
+- Auto suggest ingredient names while adding recipe
+- Add screen to view, edit, delete ingredients
+- Add screen to view, edit, delete recipes
+
+## Bugs
+
+- When ingredients are deleted from add recipe screen, the UI isn't updated as per the row deleted.

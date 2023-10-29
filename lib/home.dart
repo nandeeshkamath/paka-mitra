@@ -26,7 +26,7 @@ class _HomePage extends State<HomePage> {
         },
         child: Container(
           width: MediaQuery.sizeOf(context).width * 0.4,
-          height: 200,
+          height: MediaQuery.sizeOf(context).width * 0.4,
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(10),
@@ -151,6 +151,7 @@ class _HomePage extends State<HomePage> {
         height: MediaQuery.sizeOf(context).height,
         alignment: Alignment.center,
         child: GridView.count(
+          padding: const EdgeInsets.all(10),
           shrinkWrap: true,
           crossAxisCount: 2,
           children: [

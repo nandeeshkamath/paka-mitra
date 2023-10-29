@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:wing_cook/database/recipe_repository.dart';
 import 'package:wing_cook/model/ingredient.dart';
+import 'package:wing_cook/model/recipe.dart';
 import 'package:wing_cook/util.dart';
 
 class AddRecipe extends StatefulWidget {
@@ -12,11 +14,17 @@ class AddRecipe extends StatefulWidget {
 }
 
 class _AddRecipe extends State<AddRecipe> {
+  final _recipeNameController = TextEditingController();
+  int _sampleSize = 25;
   final List<IngredientForRecipe> _ingredients =
       List<IngredientForRecipe>.generate(
           1, (index) => IngredientForRecipe(index));
   bool addButtonVisibility = false;
   final _formKey = GlobalKey<FormState>();
+
+  Future<void> addRecipe(Recipe recipe) async {
+    await RecipesRepository.save(recipe);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +36,22 @@ class _AddRecipe extends State<AddRecipe> {
             padding: const EdgeInsets.symmetric(horizontal: 3),
             child: PopupMenuButton(
               offset: const Offset(0, 45),
-              initialValue: '25',
+              initialValue: _sampleSize,
               tooltip: 'Sample size',
+              onSelected: (value) {
+                setState(() {
+                  final parsed = int.tryParse(value.toString());
+                  debugPrint(parsed?.toString());
+                  if (parsed != null) {
+                    _sampleSize = parsed;
+                  }
+                });
+              },
               itemBuilder: (BuildContext context) {
-                return {'25', '50', '100', '250', '500', '1000'}
-                    .map((String choice) {
+                return sampleSizes.map((int choice) {
                   return PopupMenuItem<String>(
-                    value: choice,
-                    child: Text(choice),
+                    value: choice.toString(),
+                    child: Text(choice.toString()),
                   );
                 }).toList();
               },
@@ -44,51 +60,20 @@ class _AddRecipe extends State<AddRecipe> {
                   borderRadius: BorderRadius.circular(5),
                   color: Colors.black12,
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(5),
+                child: Padding(
+                  padding: const EdgeInsets.all(5),
                   child: Row(
                     children: [
-                      Icon(Icons.people_outline_sharp),
-                      Padding(padding: EdgeInsets.symmetric(horizontal: 2)),
-                      Text('25'),
+                      const Icon(Icons.people_outline_sharp),
+                      const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 2)),
+                      Text(_sampleSize.toString()),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 3),
-          //   child: PopupMenuButton(
-          //     initialValue: 'Kilogram',
-          //     offset: const Offset(0, 45),
-          //     tooltip: 'Unit scale',
-          //     itemBuilder: (BuildContext context) {
-          //       return {'Kilogram', 'Gram'}.map((String choice) {
-          //         return PopupMenuItem<String>(
-          //           value: choice,
-          //           child: Text(choice),
-          //         );
-          //       }).toList();
-          //     },
-          //     child: Container(
-          //       decoration: BoxDecoration(
-          //         borderRadius: BorderRadius.circular(5),
-          //         color: Colors.black12,
-          //       ),
-          //       child: const Padding(
-          //         padding: EdgeInsets.all(5),
-          //         child: Row(
-          //           children: [
-          //             Icon(Icons.scale),
-          //             Padding(padding: EdgeInsets.symmetric(horizontal: 2)),
-          //             Text('KG'),
-          //           ],
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -112,8 +97,12 @@ class _AddRecipe extends State<AddRecipe> {
             FloatingActionButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Processing Data')),
+                  addRecipe(
+                    Recipe(
+                      _recipeNameController.text,
+                      _sampleSize,
+                      toQuantifiedIngredients(_ingredients),
+                    ),
                   );
                 }
               },
@@ -134,6 +123,7 @@ class _AddRecipe extends State<AddRecipe> {
                   padding: EdgeInsets.symmetric(vertical: 5),
                 ),
                 TextFormField(
+                  controller: _recipeNameController,
                   keyboardType: TextInputType.name,
                   style: const TextStyle(
                     fontSize: 20,
@@ -167,6 +157,7 @@ class _AddRecipe extends State<AddRecipe> {
                           Expanded(
                             flex: 10,
                             child: TextFormField(
+                              controller: _ingredients[index].nameController,
                               keyboardType: TextInputType.name,
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
@@ -192,9 +183,56 @@ class _AddRecipe extends State<AddRecipe> {
                             ),
                           ),
                           const Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            child: PopupMenuButton(
+                              initialValue:
+                                  _ingredients[index].measuringUnit.value,
+                              offset: const Offset(0, 45),
+                              tooltip: 'Unit scale',
+                              onSelected: (value) {
+                                setState(() {
+                                  _ingredients[index].measuringUnit =
+                                      toMeasuringUnit(value);
+                                });
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return MeasuringUnit.values
+                                    .map((MeasuringUnit choice) {
+                                  return PopupMenuItem<String>(
+                                    value: choice.value,
+                                    child: Text(choice.value),
+                                  );
+                                }).toList();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(color: Colors.black12),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.scale),
+                                      const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 2)),
+                                      Text(_ingredients[index]
+                                          .measuringUnit
+                                          .abbr),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
                           Expanded(
                             flex: 4,
                             child: TextFormField(
+                              controller:
+                                  _ingredients[index].quantityController,
                               textAlign: TextAlign.center,
                               keyboardType:
                                   const TextInputType.numberWithOptions(),

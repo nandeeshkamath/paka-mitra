@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wing_cook/database/ingredients_repository.dart';
+import 'package:wing_cook/model/ingredient.dart';
 
 class AddIngredient extends StatefulWidget {
   const AddIngredient({super.key});
@@ -11,6 +13,13 @@ class AddIngredient extends StatefulWidget {
 
 class _AddIngredient extends State<AddIngredient> {
   final _formKey = GlobalKey<FormState>();
+  final _nameConstroller = TextEditingController();
+  final _descriptionController = TextEditingController();
+  MeasuringUnit _measuringUnit = MeasuringUnit.kilogram;
+
+  Future<void> addIngredient(Ingredient ingredient) async {
+    await IngredientsRepository.saveIngredient(ingredient);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +33,12 @@ class _AddIngredient extends State<AddIngredient> {
         child: FloatingActionButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Processing Data')),
+              addIngredient(
+                Ingredient(
+                  _nameConstroller.text,
+                  _measuringUnit,
+                  _descriptionController.text,
+                ),
               );
             }
           },
@@ -46,33 +59,39 @@ class _AddIngredient extends State<AddIngredient> {
                 Row(
                   children: [
                     Expanded(
-                        child: TextFormField(
-                      keyboardType: TextInputType.name,
-                      style: const TextStyle(
-                        fontSize: 20,
+                      child: TextFormField(
+                        controller: _nameConstroller,
+                        keyboardType: TextInputType.name,
+                        style: const TextStyle(
+                          fontSize: 20,
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: 'Ingredient name',
+                          border: InputBorder.none,
+                        ),
+                        // The validator receives the text that the user has entered.
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
                       ),
-                      decoration: const InputDecoration(
-                        hintText: 'Ingredient name',
-                        border: InputBorder.none,
-                      ),
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter some text';
-                        }
-                        return null;
-                      },
-                    )),
+                    ),
                     PopupMenuButton(
-                      initialValue: 'Kilogram',
+                      initialValue: _measuringUnit.toString(),
                       offset: const Offset(0, 45),
                       tooltip: 'Unit scale',
+                      onSelected: (value) {
+                        setState(() {
+                          _measuringUnit = toMeasuringUnit(value);
+                        });
+                      },
                       itemBuilder: (BuildContext context) {
-                        return {'Kilogram', 'Gram', 'Liter', 'Milli Liter'}
-                            .map((String choice) {
+                        return MeasuringUnit.values.map((MeasuringUnit choice) {
                           return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(choice),
+                            value: choice.value,
+                            child: Text(choice.value),
                           );
                         }).toList();
                       },
@@ -84,15 +103,15 @@ class _AddIngredient extends State<AddIngredient> {
                           borderRadius: BorderRadius.circular(5),
                           border: Border.all(color: Colors.black12),
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(5),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.scale),
-                              Padding(
+                              const Icon(Icons.scale),
+                              const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 5)),
-                              Text('KG'),
+                              Text(_measuringUnit.abbr),
                             ],
                           ),
                         ),
@@ -103,6 +122,7 @@ class _AddIngredient extends State<AddIngredient> {
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: TextFormField(
+                    controller: _descriptionController,
                     keyboardType: TextInputType.name,
                     decoration: const InputDecoration(
                       hintText: 'Description (Optional)',
