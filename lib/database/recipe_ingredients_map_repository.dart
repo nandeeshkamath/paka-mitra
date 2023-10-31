@@ -37,6 +37,16 @@ class RecipeIngredientsMapRepository {
     }
   }
 
+  static Future<void> deleteIngredientsOfRecipeIdMapping(int recipeId) async {
+    final db = await DatabaseHelper.db();
+    try {
+      await db.delete("recipe_ingredient_map",
+          where: "recipeId = ?", whereArgs: [recipeId]);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+  }
+
   // static Future<void> deleteAll() async {
   //   final db = await DatabaseHelper.db();
   //   try {

@@ -33,10 +33,10 @@ class _AddRecipe extends State<AddRecipe> {
         title: const Text('Add Recipe'),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 5),
             child: PopupMenuButton(
               offset: const Offset(0, 45),
-              initialValue: _sampleSize,
+              initialValue: _sampleSize.toString(),
               tooltip: 'Sample size',
               onSelected: (value) {
                 setState(() {
@@ -56,9 +56,10 @@ class _AddRecipe extends State<AddRecipe> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: Colors.black12,
-                ),
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(
+                      color: Colors.black12,
+                    )),
                 child: Padding(
                   padding: const EdgeInsets.all(5),
                   child: Row(
@@ -84,6 +85,7 @@ class _AddRecipe extends State<AddRecipe> {
             Visibility(
               visible: addButtonVisibility,
               child: FloatingActionButton(
+                heroTag: 'add_blank_ingredient',
                 onPressed: () {
                   setState(() {
                     _ingredients
@@ -94,6 +96,7 @@ class _AddRecipe extends State<AddRecipe> {
               ),
             ),
             FloatingActionButton(
+              heroTag: 'add_recipe',
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   addRecipe(
@@ -184,51 +187,6 @@ class _AddRecipe extends State<AddRecipe> {
                             ),
                           ),
                           const Spacer(),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
-                            child: PopupMenuButton(
-                              initialValue:
-                                  _ingredients[index].measuringUnit.value,
-                              offset: const Offset(0, 45),
-                              tooltip: 'Unit scale',
-                              onSelected: (value) {
-                                setState(() {
-                                  _ingredients[index].measuringUnit =
-                                      toMeasuringUnit(value);
-                                });
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return MeasuringUnit.values
-                                    .map((MeasuringUnit choice) {
-                                  return PopupMenuItem<String>(
-                                    value: choice.value,
-                                    child: Text(choice.value),
-                                  );
-                                }).toList();
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(color: Colors.black12),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.scale),
-                                      const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 2)),
-                                      Text(_ingredients[index]
-                                          .measuringUnit
-                                          .abbr),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
                           Expanded(
                             flex: 4,
                             child: TextFormField(
@@ -266,6 +224,48 @@ class _AddRecipe extends State<AddRecipe> {
                               },
                             ),
                           ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            child: PopupMenuButton(
+                              initialValue:
+                                  _ingredients[index].measuringUnit.value,
+                              offset: const Offset(0, 45),
+                              tooltip: 'Unit scale',
+                              onSelected: (value) {
+                                setState(() {
+                                  _ingredients[index].measuringUnit =
+                                      toMeasuringUnit(value);
+                                });
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return MeasuringUnit.values
+                                    .map((MeasuringUnit choice) {
+                                  return PopupMenuItem<String>(
+                                    value: choice.value,
+                                    child: Text(
+                                        "${choice.value} (${choice.abbr})"),
+                                  );
+                                }).toList();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(color: Colors.black12),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Row(
+                                    children: [
+                                      Text(_ingredients[index]
+                                          .measuringUnit
+                                          .abbr),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // const Spacer(),
                           IconButton(
                             color: Colors.blue,
                             icon: const Icon(Icons.remove),

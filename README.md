@@ -17,12 +17,14 @@ samples, guidance on mobile development, and a full API reference.
 
 ## ToDo
 
-- Add ability to persist
-- Persist ingredients
-- Persist recipe
-- Auto suggest ingredient names while adding recipe
-- Add screen to view, edit, delete ingredients
-- Add screen to view, edit, delete recipes
+- Add ability to persist - Done
+- Persist ingredients - Done
+- Persist recipe - Done
+- Auto suggest ingredient names while adding recipe - Done
+- Add screen to view, edit, delete ingredients - Done
+- Add screen to view, edit, delete recipes - Done
+- Auto suggest ingredient in add recipe screen
+- Add ability to search ingredients, recipe
 
 ## Bugs
 

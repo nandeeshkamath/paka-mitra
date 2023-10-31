@@ -87,13 +87,14 @@ class RecipesRepository {
     return result;
   }
 
-  static Future<void> deleteIngredient(int id) async {
+  static Future<void> delete(int id) async {
     final db = await DatabaseHelper.db();
     try {
-      await db.delete("ingredients", where: "id = ?", whereArgs: [id]);
+      await db.delete("recipes", where: "id = ?", whereArgs: [id]);
     } catch (err) {
-      debugPrint("Something went wrong when deleting an item: $err");
+      debugPrint("Something went wrong when deleting a recipe: $err");
     }
+    RecipeIngredientsMapRepository.deleteIngredientsOfRecipeIdMapping(id);
   }
 
   static Future<void> deleteAll() async {
