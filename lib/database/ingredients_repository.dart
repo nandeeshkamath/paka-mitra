@@ -9,7 +9,7 @@ class IngredientsRepository {
 
     final data = {
       'name': ingredient.name,
-      'measuringUnit': ingredient.measuringUnit.toString(),
+      'measuringUnit': ingredient.measuringUnit.value,
       'description': ingredient.description
     };
     final id = await db.insert('ingredients', data,

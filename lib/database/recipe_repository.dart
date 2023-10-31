@@ -9,7 +9,6 @@ import 'package:wing_cook/model/recipe.dart';
 class RecipesRepository {
   static Future<Recipe> save(Recipe recipe) async {
     final db = await DatabaseHelper.db();
-    deleteAll();
 
     for (var quantifiedIngredient in recipe.ingredients) {
       if (quantifiedIngredient.ingredient.id == 0) {
@@ -28,14 +27,11 @@ class RecipesRepository {
     Recipe inserted =
         Recipe.withID(id, recipe.name, recipe.sampleSize, recipe.ingredients);
 
-    recipe.ingredients.map(
-      (e) {
-        RecipeIngredientMap recIngMap =
-            RecipeIngredientMap(inserted.id, e.ingredient.id, e.quantity);
-        RecipeIngredientsMapRepository.save(recIngMap);
-      },
-    );
-    getAll().then((value) => print(value));
+    for (var q in recipe.ingredients) {
+      RecipeIngredientMap recIngMap =
+          RecipeIngredientMap(inserted.id, q.ingredient.id, q.quantity);
+      RecipeIngredientsMapRepository.save(recIngMap);
+    }
     return inserted;
   }
 
@@ -64,7 +60,6 @@ class RecipesRepository {
       List<QuantifiedIngredient> quantifiedIngredients =
           List.empty(growable: true);
       for (var recIngMap in recIngMaps) {
-        print(recIngMap);
         List<Ingredient> ingredients =
             await IngredientsRepository.getIngredient(recIngMap.ingredientId);
         quantifiedIngredients
@@ -104,7 +99,8 @@ class RecipesRepository {
   static Future<void> deleteAll() async {
     final db = await DatabaseHelper.db();
     try {
-      await db.delete("ingredients");
+      await db.delete("recipes");
+      await db.delete("recipe_ingredient_map");
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }
@@ -112,10 +108,13 @@ class RecipesRepository {
 
   static Recipe toRecipe(Map<String, dynamic> recipe,
       List<QuantifiedIngredient> quantifiedIngredients) {
+    int id = recipe['id'];
+    String name = recipe['name'];
+    int sampleSize = recipe['sampleSize'];
     return Recipe.withID(
-      recipe['id'],
-      recipe['name'],
-      recipe['samepleSize'],
+      id,
+      name,
+      sampleSize,
       quantifiedIngredients,
     );
   }

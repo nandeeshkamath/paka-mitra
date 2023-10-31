@@ -41,6 +41,8 @@ class _AddIngredient extends State<AddIngredient> {
                 ),
               );
             }
+
+            Navigator.pop(context);
           },
           child: const Icon(Icons.done),
         ),

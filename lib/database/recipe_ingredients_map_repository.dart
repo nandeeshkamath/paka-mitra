@@ -21,7 +21,7 @@ class RecipeIngredientsMapRepository {
       int recipeId) async {
     final db = await DatabaseHelper.db();
     List<Map<String, dynamic>> result = await db.query('recipe_ingredient_map',
-        where: "recipeId = ?", whereArgs: [recipeId], limit: 1);
+        where: "recipeId = ?", whereArgs: [recipeId]);
     return result.map((e) => toRecipeIngredientMap(e)).toList();
   }
 

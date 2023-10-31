@@ -23,7 +23,8 @@ class DatabaseHelper {
       )
       """);
     await database.execute("""CREATE TABLE recipe_ingredient_map(
-        recipeId INTEGER PRIMARY KEY NOT NULL,
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        recipeId INTEGER NOT NULL,
         ingredientId INTEGER NOT NULL,
         quantity REAL NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

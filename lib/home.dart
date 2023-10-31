@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:wing_cook/add_ingredient.dart';
 import 'package:wing_cook/add_recipe.dart';
+import 'package:wing_cook/view_ingredients.dart';
+import 'package:wing_cook/view_recipes.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -157,8 +159,9 @@ class _HomePage extends State<HomePage> {
           children: [
             gridTile('Create estimate (soon)', Colors.grey, null),
             gridTile('View previous estimates (soon)', Colors.grey, null),
-            gridTile('View ingredients', Colors.orange, const AddIngredient()),
-            gridTile('View recipes', Colors.orange, const AddRecipe()),
+            gridTile(
+                'View ingredients', Colors.orange, const ViewIngredients()),
+            gridTile('View recipes', Colors.orange, const ViewRecipes()),
           ],
         ),
       ),

@@ -41,7 +41,6 @@ class _AddRecipe extends State<AddRecipe> {
               onSelected: (value) {
                 setState(() {
                   final parsed = int.tryParse(value.toString());
-                  debugPrint(parsed?.toString());
                   if (parsed != null) {
                     _sampleSize = parsed;
                   }
@@ -105,6 +104,8 @@ class _AddRecipe extends State<AddRecipe> {
                     ),
                   );
                 }
+
+                Navigator.pop(context);
               },
               child: const Icon(Icons.done),
             )
