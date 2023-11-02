@@ -98,23 +98,16 @@ class _AddIngredient extends State<AddIngredient> {
                         }).toList();
                       },
                       child: Container(
-                        height: 50,
-                        width: 80,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           border: Border.all(color: Colors.black12),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.scale),
-                              const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 5)),
-                              Text(_measuringUnit.abbr),
-                            ],
+                          padding: const EdgeInsets.all(8),
+                          child: Text(
+                            _measuringUnit.abbr,
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ),
                       ),

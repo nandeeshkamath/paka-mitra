@@ -66,7 +66,7 @@ class RecipesRepository {
             .add(QuantifiedIngredient(ingredients[0], recIngMap.quantity));
       }
 
-      recipeList.add(toRecipe(recipe, quantifiedIngredients));
+      recipeList.add(toRecipe(recipe, quantifiedIngredients.toSet()));
     }
     return recipeList;
   }
@@ -108,7 +108,7 @@ class RecipesRepository {
   }
 
   static Recipe toRecipe(Map<String, dynamic> recipe,
-      List<QuantifiedIngredient> quantifiedIngredients) {
+      Set<QuantifiedIngredient> quantifiedIngredients) {
     int id = recipe['id'];
     String name = recipe['name'];
     int sampleSize = recipe['sampleSize'];

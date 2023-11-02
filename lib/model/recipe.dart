@@ -4,7 +4,7 @@ class Recipe {
   int id = 0;
   String name;
   int sampleSize;
-  List<QuantifiedIngredient> ingredients;
+  Set<QuantifiedIngredient> ingredients;
 
   Recipe(this.name, this.sampleSize, this.ingredients);
 
@@ -28,11 +28,47 @@ class RecipeIngredientMap {
 
 Set<int> sampleSizes = {25, 50, 100, 250, 500, 1000};
 
-List<QuantifiedIngredient> toQuantifiedIngredients(
+Set<QuantifiedIngredient> toQuantifiedIngredients(
     List<IngredientForRecipe> ingredientsForRecipe) {
   return ingredientsForRecipe
       .map((e) => QuantifiedIngredient(
-          Ingredient(e.nameController.text, e.measuringUnit, null),
+          Ingredient(
+              e.nameController.dropDownValue!.name, e.measuringUnit, null),
           double.parse(e.quantityController.text)))
-      .toList();
+      .toSet();
+}
+
+Set<Recipe> stubRecipes() {
+  return {
+    Recipe(
+      'Sambar',
+      25,
+      {
+        QuantifiedIngredient(
+            Ingredient('Tool Dal', MeasuringUnit.kilogram, null), 5.5),
+        QuantifiedIngredient(
+            Ingredient('Sambar Powder', MeasuringUnit.kilogram, null), 3.1),
+      },
+    ),
+    Recipe(
+      'Upma',
+      25,
+      {
+        QuantifiedIngredient(
+            Ingredient('Rava', MeasuringUnit.kilogram, null), 5.7),
+        QuantifiedIngredient(
+            Ingredient('Coconut grating', MeasuringUnit.liter, null), 3.5),
+      },
+    ),
+    Recipe(
+      'Chitranna',
+      25,
+      {
+        QuantifiedIngredient(
+            Ingredient('White rice', MeasuringUnit.kilogram, null), 10.9),
+        QuantifiedIngredient(
+            Ingredient('Turmeric', MeasuringUnit.kilogram, null), 0.5),
+      },
+    ),
+  };
 }
