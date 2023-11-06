@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wing_cook/add_recipe.dart';
 import 'package:wing_cook/home.dart';
-import 'package:wing_cook/view_ingredients.dart';
-import 'package:wing_cook/view_recipes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,7 +24,7 @@ class _MyApp extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const AddRecipe(),
+      home: const HomePage(),
     );
   }
 }

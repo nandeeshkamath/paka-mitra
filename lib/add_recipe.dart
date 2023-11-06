@@ -1,5 +1,3 @@
-import 'package:dropdown_search/dropdown_search.dart';
-import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:wing_cook/database/ingredients_repository.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
@@ -19,7 +17,7 @@ class AddRecipe extends StatefulWidget {
 class _AddRecipe extends State<AddRecipe> {
   final _recipeNameController = TextEditingController();
   int _sampleSize = 25;
-  late Future<List<Ingredient>> _storedIngredients;
+  late List<Ingredient> _storedIngredients;
   final List<IngredientForRecipe> _ingredients =
       List<IngredientForRecipe>.generate(
           1, (index) => IngredientForRecipe(index));
@@ -34,19 +32,12 @@ class _AddRecipe extends State<AddRecipe> {
     return stubRecipes();
   }
 
-  Future<List<String>> getDropdownIngredients(String value) {
-    return _storedIngredients.then((value) => value
-        .map(
-          (e) => e.name,
-        )
-        .toList());
-  }
-
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    final list = await IngredientsRepository.getIngredients();
     setState(() {
-      _storedIngredients = IngredientsRepository.getIngredients();
+      _storedIngredients = list;
     });
   }
 
@@ -179,7 +170,6 @@ class _AddRecipe extends State<AddRecipe> {
                     hintText: 'Recipe name',
                     border: InputBorder.none,
                   ),
-                  // The validator receives the text that the user has entered.
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter some text';
@@ -203,55 +193,73 @@ class _AddRecipe extends State<AddRecipe> {
                         children: [
                           Expanded(
                             flex: 10,
-                            child: DropdownSearch<String>(
-                              // controller: _ingredients[index].nameController,
-
-                              dropdownDecoratorProps:
-                                  const DropDownDecoratorProps(
-                                dropdownSearchDecoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "Ingredient name",
-                                ),
-                              ),
-                              popupProps: const PopupProps.menu(
-                                showSearchBox: true,
-                                // disabledItemFn: (int i) => i <= 3,
-                              ),
-
-                              // textFieldDecoration: const InputDecoration(
-                              //   border: InputBorder.none,
-                              //   hintText: 'Ingredient name',
-                              // ),
-                              // enableSearch: true,
-                              asyncItems: getDropdownIngredients,
-                              // items: getDropdownIngredients(),
-                              // enableSearch: true,
-                              // clearOption: true,
-                              // searchKeyboardType: TextInputType.name,
-
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter some text';
+                            child: Autocomplete<Ingredient>(
+                              optionsBuilder: (TextEditingValue editingValue) {
+                                if (editingValue.text == '') {
+                                  return const Iterable<Ingredient>.empty();
                                 }
-                                return null;
-                              },
-                              onChanged: (value) {
-                                setState(() {
-                                  _ingredients[index].name = value;
-
-                                  if (_ingredients.length == 1 &&
-                                      addButtonVisibility == false) {
-                                    addButtonVisibility = true;
-                                  }
+                                return _storedIngredients
+                                    .where((Ingredient option) {
+                                  return option.name.toLowerCase().contains(
+                                      editingValue.text.toLowerCase());
                                 });
                               },
-                              // The validator receives the text that the user has entered.
-                              // validator: (value) {
-                              //   if (value == null || value.isEmpty) {
-                              //     return 'Please enter some text';
-                              //   }
-                              //   return null;
-                              // },
+                              onSelected: (Ingredient value) {
+                                setState(
+                                  () {
+                                    _ingredients[index].name = value.name;
+                                    _ingredients[index].id = value.id;
+
+                                    if (_ingredients.length == 1 &&
+                                        addButtonVisibility == false) {
+                                      addButtonVisibility = true;
+                                    }
+                                  },
+                                );
+                              },
+                              fieldViewBuilder: (context, textEditingController,
+                                  focusNode, onFieldSubmitted) {
+                                _ingredients[index].nameController =
+                                    textEditingController;
+                                return TextField(
+                                  focusNode: focusNode,
+                                  controller: textEditingController,
+                                  onEditingComplete: () {
+                                    _ingredients[index].name =
+                                        textEditingController.text;
+                                    onFieldSubmitted();
+                                  },
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: 'Ingredient name',
+                                  ),
+                                );
+                              },
+                              optionsViewBuilder:
+                                  (context, onSelected, options) {
+                                return Material(
+                                  child: ListView.separated(
+                                    separatorBuilder: (context, index) =>
+                                        const Divider(),
+                                    itemBuilder: (context, index) {
+                                      final ingredient =
+                                          options.elementAt(index);
+                                      return GestureDetector(
+                                        onTap: () {
+                                          onSelected(ingredient);
+                                        },
+                                        child: ListTile(
+                                          title: Text(
+                                            ingredient.name,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    itemCount: options.length,
+                                  ),
+                                );
+                              },
+                              displayStringForOption: (option) => option.name,
                             ),
                           ),
                           Expanded(

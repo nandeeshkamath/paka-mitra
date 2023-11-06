@@ -1,11 +1,9 @@
-import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 
 class IngredientForRecipe {
   int index;
   int id = 0;
-  SingleValueDropDownController nameController =
-      SingleValueDropDownController();
+  TextEditingController nameController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   MeasuringUnit measuringUnit = MeasuringUnit.kilogram;
   String? name;

@@ -32,8 +32,7 @@ Set<QuantifiedIngredient> toQuantifiedIngredients(
     List<IngredientForRecipe> ingredientsForRecipe) {
   return ingredientsForRecipe
       .map((e) => QuantifiedIngredient(
-          Ingredient(
-              e.nameController.dropDownValue!.name, e.measuringUnit, null),
+          Ingredient.withID(e.id, e.nameController.text, e.measuringUnit, null),
           double.parse(e.quantityController.text)))
       .toSet();
 }
@@ -45,7 +44,7 @@ Set<Recipe> stubRecipes() {
       25,
       {
         QuantifiedIngredient(
-            Ingredient('Tool Dal', MeasuringUnit.kilogram, null), 5.5),
+            Ingredient('Toor Dal', MeasuringUnit.kilogram, null), 5.5),
         QuantifiedIngredient(
             Ingredient('Sambar Powder', MeasuringUnit.kilogram, null), 3.1),
       },
