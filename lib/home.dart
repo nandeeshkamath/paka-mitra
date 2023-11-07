@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:wing_cook/add_ingredient.dart';
 import 'package:wing_cook/add_recipe.dart';
+import 'package:wing_cook/create_estimate.dart';
 import 'package:wing_cook/view_ingredients.dart';
 import 'package:wing_cook/view_recipes.dart';
 
@@ -30,7 +31,7 @@ class _HomePage extends State<HomePage> {
           width: MediaQuery.sizeOf(context).width * 0.4,
           height: MediaQuery.sizeOf(context).width * 0.4,
           decoration: BoxDecoration(
-            color: color,
+            color: Colors.blue,
             borderRadius: BorderRadius.circular(10),
             boxShadow: const [
               BoxShadow(
@@ -58,7 +59,7 @@ class _HomePage extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Paka Mitra'),
+        title: const Text('Paaka Mitra'),
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
@@ -76,7 +77,7 @@ class _HomePage extends State<HomePage> {
               ),
               child: Center(
                 child: Text(
-                  'Paka Mitra',
+                  'Paaka Mitra',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20,
@@ -157,8 +158,9 @@ class _HomePage extends State<HomePage> {
           shrinkWrap: true,
           crossAxisCount: 2,
           children: [
-            gridTile('Create estimate (soon)', Colors.grey, null),
-            gridTile('View previous estimates (soon)', Colors.grey, null),
+            gridTile(
+                'Create estimate', Colors.orange, const CreateEstimation()),
+            gridTile('View previous estimates', Colors.orange, null),
             gridTile(
                 'View ingredients', Colors.orange, const ViewIngredients()),
             gridTile('View recipes', Colors.orange, const ViewRecipes()),

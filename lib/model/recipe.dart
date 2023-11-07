@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:wing_cook/model/ingredient.dart';
 
 class Recipe {
@@ -16,6 +17,13 @@ class QuantifiedIngredient {
   double quantity;
 
   QuantifiedIngredient(this.ingredient, this.quantity);
+
+  QuantifiedIngredient merge(QuantifiedIngredient another) {
+    if (ingredient.id != another.ingredient.id) {
+      throw Exception('Different types cannot be merged!');
+    }
+    return QuantifiedIngredient(ingredient, quantity + another.quantity);
+  }
 }
 
 class RecipeIngredientMap {
@@ -24,6 +32,17 @@ class RecipeIngredientMap {
   double quantity;
 
   RecipeIngredientMap(this.recipeId, this.ingredientId, this.quantity);
+}
+
+class RecipeForEstimation {
+  int index;
+  // int id = 0;
+  // String? name;
+  TextEditingController nameController = TextEditingController();
+  String? error;
+  Recipe? recipe;
+
+  RecipeForEstimation(this.index);
 }
 
 Set<int> sampleSizes = {25, 50, 100, 250, 500, 1000};
@@ -47,6 +66,10 @@ Set<Recipe> stubRecipes() {
             Ingredient('Toor Dal', MeasuringUnit.kilogram, null), 5.5),
         QuantifiedIngredient(
             Ingredient('Sambar Powder', MeasuringUnit.kilogram, null), 3.1),
+        // QuantifiedIngredient(
+        //     Ingredient('Coconut grating', MeasuringUnit.kilogram, null), 1.5),
+        // QuantifiedIngredient(
+        //     Ingredient('Coconut oil', MeasuringUnit.liter, null), 1.1),
       },
     ),
     Recipe(
@@ -56,7 +79,9 @@ Set<Recipe> stubRecipes() {
         QuantifiedIngredient(
             Ingredient('Rava', MeasuringUnit.kilogram, null), 5.7),
         QuantifiedIngredient(
-            Ingredient('Coconut grating', MeasuringUnit.liter, null), 3.5),
+            Ingredient('Coconut grating', MeasuringUnit.kilogram, null), 3.5),
+        // QuantifiedIngredient(
+        //     Ingredient('Coconut oil', MeasuringUnit.liter, null), 1.8),
       },
     ),
     Recipe(
@@ -67,6 +92,8 @@ Set<Recipe> stubRecipes() {
             Ingredient('White rice', MeasuringUnit.kilogram, null), 10.9),
         QuantifiedIngredient(
             Ingredient('Turmeric', MeasuringUnit.kilogram, null), 0.5),
+        // QuantifiedIngredient(
+        //     Ingredient('Coconut oil', MeasuringUnit.liter, null), 1.3),
       },
     ),
   };
