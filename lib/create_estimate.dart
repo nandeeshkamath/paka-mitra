@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
-import 'package:wing_cook/model/ingredient.dart';
 import 'package:wing_cook/model/recipe.dart';
 
 class CreateEstimation extends StatefulWidget {
@@ -70,130 +69,197 @@ class _CreateEstimation extends State<CreateEstimation> {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: PopupMenuButton(
-              offset: const Offset(0, 45),
-              initialValue: _sampleSize.toString(),
-              tooltip: 'Sample size',
-              onSelected: (value) {
-                setState(() {
-                  final parsed = int.tryParse(value.toString());
-                  if (parsed != null) {
-                    _sampleSize = parsed;
-                  }
-                });
-              },
-              itemBuilder: (BuildContext context) {
-                return sampleSizes.map((int choice) {
-                  return PopupMenuItem<String>(
-                    value: choice.toString(),
-                    child: Text(choice.toString()),
-                  );
-                }).toList();
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(
-                      color: Colors.black12,
-                    )),
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.people_outline_sharp),
-                      const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 2)),
-                      Text(_sampleSize.toString()),
-                    ],
+            child: TextButton(
+                onPressed: () {},
+                style: ButtonStyle(
+                  backgroundColor:
+                      ButtonStyleButton.allOrNull<Color>(Colors.blue),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
+                child: const Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Text(
+                    'Done',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                )),
+          )
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 5),
+          //   child: PopupMenuButton(
+          //     offset: const Offset(0, 45),
+          //     initialValue: _sampleSize.toString(),
+          //     tooltip: 'Sample size',
+          //     onSelected: (value) {
+          //       setState(() {
+          //         final parsed = int.tryParse(value.toString());
+          //         if (parsed != null) {
+          //           _sampleSize = parsed;
+          //         }
+          //       });
+          //     },
+          //     itemBuilder: (BuildContext context) {
+          //       return sampleSizes.map((int choice) {
+          //         return PopupMenuItem<String>(
+          //           value: choice.toString(),
+          //           child: Text(choice.toString()),
+          //         );
+          //       }).toList();
+          //     },
+          //     child: Container(
+          //       decoration: BoxDecoration(
+          //           borderRadius: BorderRadius.circular(5),
+          //           border: Border.all(
+          //             color: Colors.black12,
+          //           )),
+          //       child: Padding(
+          //         padding: const EdgeInsets.all(5),
+          //         child: Row(
+          //           children: [
+          //             const Icon(Icons.people_outline_sharp),
+          //             const Padding(
+          //                 padding: EdgeInsets.symmetric(horizontal: 2)),
+          //             Text(_sampleSize.toString()),
+          //           ],
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Visibility(
-              visible: addButtonVisibility,
-              child: FloatingActionButton(
-                heroTag: 'add_blank_recipe',
-                onPressed: () {
-                  setState(() {
-                    _recipes.add(RecipeForEstimation(_recipes.length - 1));
-                  });
-                },
-                child: const Icon(Icons.add),
-              ),
-            ),
-            FloatingActionButton(
-              heroTag: 'calculate_estimation',
-              onPressed: () {
-                // if (_formKey.currentState!.validate()) {
-                //   addRecipe(
-                //     Recipe(
-                //       _recipeNameController.text,
-                //       _sampleSize,
-                //       toQuantifiedIngredients(_recipes),
-                //     ),
-                //   );
-                // }
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: Padding(
+      //   padding: const EdgeInsets.all(20.0),
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //     children: <Widget>[
+      //       FloatingActionButton(
+      //         heroTag: 'calculate_estimation',
+      //         onPressed: () {
+      //           // if (_formKey.currentState!.validate()) {
+      //           //   addRecipe(
+      //           //     Recipe(
+      //           //       _recipeNameController.text,
+      //           //       _sampleSize,
+      //           //       toQuantifiedIngredients(_recipes),
+      //           //     ),
+      //           //   );
+      //           // }
 
-                // Navigator.pop(context);
-              },
-              child: const Icon(Icons.done),
-            )
-          ],
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 5),
-            ),
-            TextFormField(
-              controller: _recipeNameController,
-              keyboardType: TextInputType.name,
-              style: const TextStyle(
-                fontSize: 20,
+      //           // Navigator.pop(context);
+      //         },
+      //         child: const Icon(Icons.done),
+      //       )
+      //     ],
+      //   ),
+      // ),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: TextFormField(
+                  controller: _recipeNameController,
+                  keyboardType: TextInputType.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                  ),
+                  decoration: const InputDecoration(
+                    hintText: 'Estimation name',
+                    border: InputBorder.none,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter some text';
+                    }
+                    return null;
+                  },
+                ),
               ),
-              decoration: const InputDecoration(
-                hintText: 'Estimation name',
-                border: InputBorder.none,
+              SizedBox(
+                height: 50,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ListView.builder(
+                      // gridDelegate:
+                      //     const SliverGridDelegateWithFixedCrossAxisCount(
+                      //   crossAxisCount: 2,
+                      //   mainAxisSpacing: 80,
+                      //   crossAxisSpacing: 20,
+                      // ),
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      itemCount: sampleSizes.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 5),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            width: 70,
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.blue),
+                                borderRadius: BorderRadius.circular(10),
+                                color:
+                                    _sampleSize == sampleSizes.elementAt(index)
+                                        ? Colors.blue
+                                        : null),
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _sampleSize = sampleSizes.elementAt(index);
+                                });
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.people_outline_sharp,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 3),
+                                    child: Text(sampleSizes
+                                        .elementAt(index)
+                                        .toString()),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  ],
+                ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 30),
-            ),
-            SizedBox(
-              height: MediaQuery.sizeOf(context).height * 0.4,
-              child: Form(
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+              ),
+              Form(
                 key: _formKey,
-                child: SingleChildScrollView(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    itemCount: _recipes.length,
-                    shrinkWrap: true,
-                    itemBuilder: (BuildContext ctx, int index) {
-                      return Padding(
+                child: ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                  itemCount: _recipes.length,
+                  shrinkWrap: true,
+                  // itemExtent: 50,
+                  itemBuilder: (BuildContext ctx, int index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Flex(
+                        direction: Axis.horizontal,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         key: ValueKey(_recipes[index].index),
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Autocomplete<Recipe>(
+                        children: [
+                          Expanded(
+                            child: Autocomplete<Recipe>(
                               optionsBuilder: (TextEditingValue editingValue) {
                                 if (editingValue.text == '') {
                                   return const Iterable<Recipe>.empty();
@@ -226,74 +292,75 @@ class _CreateEstimation extends State<CreateEstimation> {
                                 _recipes[index].nameController =
                                     textEditingController;
 
-                                return SizedBox(
-                                  width: MediaQuery.sizeOf(context).width * 0.8,
-                                  child: TextField(
-                                    focusNode: focusNode,
-                                    controller: textEditingController,
-                                    onSubmitted: (value) {
-                                      if (!_storedRecipes.any(
-                                          (element) => element.name == value)) {
+                                return TextField(
+                                  autocorrect: false,
+                                  focusNode: focusNode,
+                                  controller: textEditingController,
+                                  onSubmitted: (value) {
+                                    if (!_storedRecipes.any(
+                                        (element) => element.name == value)) {
+                                      setState(() {
+                                        _recipes[index].error =
+                                            'Invalid recipe selected.';
+                                      });
+                                    }
+                                    //  else if (_recipes
+                                    //     .map((e) => e.recipe?.name)
+                                    //     .contains(_recipes[index]
+                                    //         .nameController
+                                    //         .text)) {
+                                    //   setState(() {
+                                    //     _recipes[index].error =
+                                    //         'Duplicate recipe.';
+                                    //   });
+                                    // }
+                                  },
+                                  onTapOutside: (event) {
+                                    String input =
+                                        _recipes[index].nameController.text;
+                                    if (input.isNotEmpty) {
+                                      if (!_storedRecipes.any((element) =>
+                                          element.name ==
+                                          _recipes[index]
+                                              .nameController
+                                              .text)) {
                                         setState(() {
                                           _recipes[index].error =
                                               'Invalid recipe selected.';
                                         });
                                       }
-                                      //  else if (_recipes
-                                      //     .map((e) => e.recipe?.name)
-                                      //     .contains(_recipes[index]
-                                      //         .nameController
-                                      //         .text)) {
-                                      //   setState(() {
-                                      //     _recipes[index].error =
-                                      //         'Duplicate recipe.';
-                                      //   });
-                                      // }
-                                    },
-                                    onTapOutside: (event) {
-                                      String input =
-                                          _recipes[index].nameController.text;
-                                      if (input.isNotEmpty) {
-                                        if (!_storedRecipes.any((element) =>
-                                            element.name ==
-                                            _recipes[index]
-                                                .nameController
-                                                .text)) {
-                                          setState(() {
-                                            _recipes[index].error =
-                                                'Invalid recipe selected.';
-                                          });
-                                        }
-                                        //   else if (_recipes
-                                        //       .map((e) => e.recipe?.name)
-                                        //       .contains(_recipes[index]
-                                        //           .nameController
-                                        //           .text)) {
-                                        //     setState(() {
-                                        //       _recipes[index].error =
-                                        //           'Duplicate recipe.';
-                                        //     });
-                                        //   }
-                                      }
-                                    },
-                                    onEditingComplete: () {
-                                      // _recipes[index].name =
-                                      //     textEditingController.text;
-                                      onFieldSubmitted();
-                                    },
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: 'Recipe name',
-                                      errorText:
-                                          _recipes[index].error?.isNotEmpty ==
-                                                      true &&
-                                                  _recipes[index]
-                                                      .nameController
-                                                      .text
-                                                      .isNotEmpty
-                                              ? _recipes[index].error
-                                              : '',
-                                    ),
+                                      //   else if (_recipes
+                                      //       .map((e) => e.recipe?.name)
+                                      //       .contains(_recipes[index]
+                                      //           .nameController
+                                      //           .text)) {
+                                      //     setState(() {
+                                      //       _recipes[index].error =
+                                      //           'Duplicate recipe.';
+                                      //     });
+                                      //   }
+                                    }
+                                  },
+                                  onEditingComplete: () {
+                                    // _recipes[index].name =
+                                    //     textEditingController.text;
+                                    onFieldSubmitted();
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    focusedBorder: const UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.red)),
+                                    hintText: 'Recipe name',
+                                    errorText:
+                                        _recipes[index].error?.isNotEmpty ==
+                                                    true &&
+                                                _recipes[index]
+                                                    .nameController
+                                                    .text
+                                                    .isNotEmpty
+                                            ? _recipes[index].error
+                                            : '',
                                   ),
                                 );
                               },
@@ -323,9 +390,25 @@ class _CreateEstimation extends State<CreateEstimation> {
                               },
                               displayStringForOption: (option) => option.name,
                             ),
-                            IconButton(
-                              color: Colors.blue,
-                              icon: const Icon(Icons.remove),
+                          ),
+                          Visibility(
+                            visible:
+                                _recipes[index].nameController.text.isNotEmpty,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.blue,
+                              ),
+                              // onDoubleTap: () {
+                              //   if (_recipes.length == 1) {
+                              //     ScaffoldMessenger.of(context).showSnackBar(
+                              //       const SnackBar(
+                              //         content: Text(
+                              //             'Estimation should include atleast one recipe.'),
+                              //       ),
+                              //     );
+                              //   }
+                              // },
                               onPressed: () {
                                 setState(() {
                                   // [TODO]nk: Clear values instead of delete row when length = 1
@@ -337,67 +420,132 @@ class _CreateEstimation extends State<CreateEstimation> {
                                       addButtonVisibility = false;
                                     }
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Estimation should include atleast one recipe.'),
-                                      ),
-                                    );
+                                    setState(() {
+                                      _recipes[index].nameController.clear();
+                                      _recipes[index].recipe = null;
+                                    });
                                   }
                                 });
                               },
                             ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
-            ),
-            Visibility(
-              visible: getIngredientCount() != 0,
-              child: const Divider(),
-            ),
-            Visibility(
-              visible: getIngredientCount() != 0,
-              child: SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.35,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Ingredient estimation',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                        ),
+              Visibility(
+                  visible: addButtonVisibility,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        left: 20,
+                        right: MediaQuery.sizeOf(context).width * 0.7),
+                    child: TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _recipes
+                              .add(RecipeForEstimation(_recipes.length - 1));
+                        });
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Icon(Icons.add),
+                          Text('Add recipe'),
+                        ],
                       ),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        itemCount: getIngredientCount(),
-                        itemBuilder: (context, index) {
-                          final ingredients = getIngredientsForRecipe();
-                          return SizedBox(
-                            height: 50,
-                            child: ListTile(
-                              title: Text(ingredients[index].ingredient.name),
-                              trailing: Text(
-                                ingredients[index].quantity.toString(),
-                                style: const TextStyle(fontSize: 16),
-                              ),
+                    ),
+                  ))
+            ],
+          ),
+          Visibility(
+            visible: getIngredientCount() != 0,
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.4,
+              minChildSize: 0.4,
+              maxChildSize: 0.9,
+              builder: (context, scrollController) {
+                return SingleChildScrollView(
+                  child: Opacity(
+                    opacity: 1,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                          color: Color(0xfffde9d5),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(25.0),
+                            topRight: Radius.circular(25.0),
+                          ),
+                          boxShadow: <BoxShadow>[
+                            BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 10.0,
+                                spreadRadius: -1.0,
+                                offset: Offset(0.0, 3.0)),
+                            BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4.0,
+                                spreadRadius: -1.0,
+                                offset: Offset(0.0, 0.0)),
+                          ]),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
                             ),
-                          );
-                        },
+                            child: Divider(
+                              thickness: 7,
+                              indent: MediaQuery.sizeOf(context).width * 0.45,
+                              endIndent:
+                                  MediaQuery.sizeOf(context).width * 0.45,
+                            ),
+                          ),
+                          const Text(
+                            'Ingredient estimation',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(
+                            height: MediaQuery.sizeOf(context).height,
+                            child: ListView.builder(
+                              controller: scrollController,
+                              // shrinkWrap: true,
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              itemCount: getIngredientCount(),
+                              itemBuilder: (context, index) {
+                                final ingredients = getIngredientsForRecipe();
+                                return SizedBox(
+                                  height: 50,
+                                  child: ListTile(
+                                    leading: const Icon(Icons.restaurant),
+                                    title: Text(
+                                      ingredients[index].ingredient.name,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    trailing: Text(
+                                      ingredients[index].quantity.toString(),
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
