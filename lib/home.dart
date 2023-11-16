@@ -1,56 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:wing_cook/add_ingredient.dart';
 import 'package:wing_cook/add_recipe.dart';
 import 'package:wing_cook/create_estimate.dart';
 import 'package:wing_cook/view_ingredients.dart';
 import 'package:wing_cook/view_recipes.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  @override
-  State<StatefulWidget> createState() {
-    return _HomePage();
-  }
-}
-
-class _HomePage extends State<HomePage> {
-  Widget gridTile(String title, Color color, Widget? onTap) {
-    return Center(
-      child: GestureDetector(
-        onTap: () {
-          if (onTap != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => onTap),
-            );
-          }
-        },
-        child: Container(
-          width: MediaQuery.sizeOf(context).width * 0.4,
-          height: MediaQuery.sizeOf(context).width * 0.4,
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black,
-                blurRadius: 5.0,
-                spreadRadius: 0.0,
-                offset: Offset(3.0, 3.0), // shadow direction: bottom right
-              )
-            ],
+  Widget gridTile(
+      BuildContext context, title, Color color, Widget? onTap, IconData icon) {
+    return Material(
+      elevation: 8,
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.blue,
+      child: TextButton(
+          onPressed: () {
+            if (onTap != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => onTap),
+              );
+            }
+          },
+          style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all(Colors.black),
+            overlayColor: MaterialStateProperty.all(Colors.transparent),
           ),
-          child: Center(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineSmall,
+          child: GridTile(
+            footer: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                // style: Theme.of(context).textTheme.headlineSmall,
+              ),
             ),
-          ),
-        ),
-      ),
+            child: Icon(
+              icon,
+              size: 70,
+            ),
+          )),
     );
   }
 
@@ -110,60 +102,26 @@ class _HomePage extends State<HomePage> {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SpeedDial(
-          icon: Icons.add,
-          tooltip: 'Add',
-          overlayOpacity: 0.3,
-          childMargin: const EdgeInsets.symmetric(vertical: 5),
-          children: [
-            SpeedDialChild(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AddIngredient()),
-                );
-              },
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-              label: 'Ingredient',
-            ),
-            SpeedDialChild(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AddRecipe()),
-                );
-              },
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-              label: 'Recipe',
-            ),
-          ],
-        ),
-      ),
-      body: Container(
-        width: MediaQuery.sizeOf(context).width,
-        height: MediaQuery.sizeOf(context).height,
-        alignment: Alignment.center,
+      body: Center(
         child: GridView.count(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           shrinkWrap: true,
           crossAxisCount: 2,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
           children: [
+            gridTile(context, 'Create estimate', Colors.orange,
+                const CreateEstimation(), Icons.calculate),
             gridTile(
-                'Create estimate', Colors.orange, const CreateEstimation()),
-            gridTile('View previous estimates', Colors.orange, null),
-            gridTile(
-                'View ingredients', Colors.orange, const ViewIngredients()),
-            gridTile('View recipes', Colors.orange, const ViewRecipes()),
+                context, 'View estimates', Colors.orange, null, Icons.history),
+            gridTile(context, 'Add ingredient', Colors.orange,
+                const AddIngredient(), Icons.app_registration),
+            gridTile(context, 'View ingredients', Colors.orange,
+                const ViewIngredients(), Icons.restaurant),
+            gridTile(context, 'Add recipe', Colors.orange, const AddRecipe(),
+                Icons.add_task),
+            gridTile(context, 'View recipes', Colors.orange,
+                const ViewRecipes(), Icons.table_restaurant),
           ],
         ),
       ),

@@ -45,7 +45,7 @@ class RecipeForEstimation {
   RecipeForEstimation(this.index);
 }
 
-Set<int> sampleSizes = {25, 50, 100, 250, 500, 1000};
+Set<int> sampleSizes = {50, 100, 250, 500, 1000};
 
 Set<QuantifiedIngredient> toQuantifiedIngredients(
     List<IngredientForRecipe> ingredientsForRecipe) {
@@ -60,7 +60,7 @@ Set<Recipe> stubRecipes() {
   return {
     Recipe(
       'Sambar',
-      25,
+      50,
       {
         QuantifiedIngredient(
             Ingredient('Toor Dal', MeasuringUnit.kilogram, null), 5.5),
@@ -74,7 +74,7 @@ Set<Recipe> stubRecipes() {
     ),
     Recipe(
       'Upma',
-      25,
+      50,
       {
         QuantifiedIngredient(
             Ingredient('Rava', MeasuringUnit.kilogram, null), 5.7),
@@ -86,7 +86,7 @@ Set<Recipe> stubRecipes() {
     ),
     Recipe(
       'Chitranna',
-      25,
+      50,
       {
         QuantifiedIngredient(
             Ingredient('White rice', MeasuringUnit.kilogram, null), 10.9),

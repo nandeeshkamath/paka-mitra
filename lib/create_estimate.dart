@@ -13,7 +13,7 @@ class CreateEstimation extends StatefulWidget {
 
 class _CreateEstimation extends State<CreateEstimation> {
   final _recipeNameController = TextEditingController();
-  int _sampleSize = 25;
+  int _sampleSize = sampleSizes.elementAt(0);
   late List<Recipe> _storedRecipes;
   final List<RecipeForEstimation> _recipes = List<RecipeForEstimation>.generate(
       1, (index) => RecipeForEstimation(index));
@@ -88,76 +88,8 @@ class _CreateEstimation extends State<CreateEstimation> {
                   ),
                 )),
           )
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 5),
-          //   child: PopupMenuButton(
-          //     offset: const Offset(0, 45),
-          //     initialValue: _sampleSize.toString(),
-          //     tooltip: 'Sample size',
-          //     onSelected: (value) {
-          //       setState(() {
-          //         final parsed = int.tryParse(value.toString());
-          //         if (parsed != null) {
-          //           _sampleSize = parsed;
-          //         }
-          //       });
-          //     },
-          //     itemBuilder: (BuildContext context) {
-          //       return sampleSizes.map((int choice) {
-          //         return PopupMenuItem<String>(
-          //           value: choice.toString(),
-          //           child: Text(choice.toString()),
-          //         );
-          //       }).toList();
-          //     },
-          //     child: Container(
-          //       decoration: BoxDecoration(
-          //           borderRadius: BorderRadius.circular(5),
-          //           border: Border.all(
-          //             color: Colors.black12,
-          //           )),
-          //       child: Padding(
-          //         padding: const EdgeInsets.all(5),
-          //         child: Row(
-          //           children: [
-          //             const Icon(Icons.people_outline_sharp),
-          //             const Padding(
-          //                 padding: EdgeInsets.symmetric(horizontal: 2)),
-          //             Text(_sampleSize.toString()),
-          //           ],
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
         ],
       ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: Padding(
-      //   padding: const EdgeInsets.all(20.0),
-      //   child: Row(
-      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //     children: <Widget>[
-      //       FloatingActionButton(
-      //         heroTag: 'calculate_estimation',
-      //         onPressed: () {
-      //           // if (_formKey.currentState!.validate()) {
-      //           //   addRecipe(
-      //           //     Recipe(
-      //           //       _recipeNameController.text,
-      //           //       _sampleSize,
-      //           //       toQuantifiedIngredients(_recipes),
-      //           //     ),
-      //           //   );
-      //           // }
-
-      //           // Navigator.pop(context);
-      //         },
-      //         child: const Icon(Icons.done),
-      //       )
-      //     ],
-      //   ),
-      // ),
       body: Stack(
         children: [
           Column(
@@ -183,63 +115,67 @@ class _CreateEstimation extends State<CreateEstimation> {
                 ),
               ),
               SizedBox(
-                height: 50,
+                height: 40,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    const Tooltip(
+                      message: 'Estimation size',
+                      child: Icon(
+                        Icons.people_outline_sharp,
+                      ),
+                    ),
                     ListView.builder(
-                      // gridDelegate:
-                      //     const SliverGridDelegateWithFixedCrossAxisCount(
-                      //   crossAxisCount: 2,
-                      //   mainAxisSpacing: 80,
-                      //   crossAxisSpacing: 20,
-                      // ),
                       scrollDirection: Axis.horizontal,
                       shrinkWrap: true,
                       itemCount: sampleSizes.length,
                       itemBuilder: (context, index) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 5),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
-                            width: 70,
-                            decoration: BoxDecoration(
-                                border: Border.all(color: Colors.blue),
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: Material(
+                            elevation: 5,
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              width: 60,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.blue,
+                                  width: 1.5,
+                                ),
                                 borderRadius: BorderRadius.circular(10),
                                 color:
                                     _sampleSize == sampleSizes.elementAt(index)
                                         ? Colors.blue
-                                        : null),
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _sampleSize = sampleSizes.elementAt(index);
-                                });
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.people_outline_sharp,
+                                        : null,
+                              ),
+                              child: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _sampleSize = sampleSizes.elementAt(index);
+                                  });
+                                },
+                                child: Text(
+                                  sampleSizes.elementAt(index).toString(),
+                                  style: TextStyle(
+                                    // fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: _sampleSize ==
+                                            sampleSizes.elementAt(index)
+                                        ? Colors.black87
+                                        : Colors.black54,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 3),
-                                    child: Text(sampleSizes
-                                        .elementAt(index)
-                                        .toString()),
-                                  )
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         );
                       },
-                    )
+                    ),
                   ],
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
+                padding: EdgeInsets.symmetric(vertical: 15),
               ),
               Form(
                 key: _formKey,
@@ -252,7 +188,7 @@ class _CreateEstimation extends State<CreateEstimation> {
                   // itemExtent: 50,
                   itemBuilder: (BuildContext ctx, int index) {
                     return Padding(
-                      padding: const EdgeInsets.all(5),
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: Flex(
                         direction: Axis.horizontal,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,6 +210,7 @@ class _CreateEstimation extends State<CreateEstimation> {
                                 }).take(3);
                               },
                               onSelected: (Recipe value) {
+                                FocusManager.instance.primaryFocus?.unfocus();
                                 setState(
                                   () {
                                     // _recipes[index].name = value.name;
@@ -348,9 +285,7 @@ class _CreateEstimation extends State<CreateEstimation> {
                                   },
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
-                                    focusedBorder: const UnderlineInputBorder(
-                                        borderSide:
-                                            BorderSide(color: Colors.red)),
+                                    isDense: true,
                                     hintText: 'Recipe name',
                                     errorText:
                                         _recipes[index].error?.isNotEmpty ==
@@ -367,20 +302,28 @@ class _CreateEstimation extends State<CreateEstimation> {
                               optionsViewBuilder:
                                   (context, onSelected, options) {
                                 return Material(
+                                  elevation: 4,
+                                  borderRadius: BorderRadius.circular(10),
                                   child: ListView.separated(
+                                    padding: const EdgeInsets.all(0),
                                     shrinkWrap: true,
                                     separatorBuilder: (context, index) =>
-                                        const Divider(),
+                                        const Divider(
+                                      indent: 20,
+                                      endIndent: 40,
+                                    ),
                                     itemBuilder: (context, index) {
                                       final recipe = options.elementAt(index);
-                                      return GestureDetector(
+                                      return ListTile(
+                                        // tileColor: Colors.amber,
+                                        // dense: true,
                                         onTap: () {
                                           onSelected(recipe);
                                         },
-                                        child: ListTile(
-                                          title: Text(
-                                            recipe.name,
-                                          ),
+                                        leading:
+                                            const Icon(Icons.table_restaurant),
+                                        title: Text(
+                                          recipe.name,
                                         ),
                                       );
                                     },
@@ -391,43 +334,30 @@ class _CreateEstimation extends State<CreateEstimation> {
                               displayStringForOption: (option) => option.name,
                             ),
                           ),
-                          Visibility(
-                            visible:
-                                _recipes[index].nameController.text.isNotEmpty,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.blue,
-                              ),
-                              // onDoubleTap: () {
-                              //   if (_recipes.length == 1) {
-                              //     ScaffoldMessenger.of(context).showSnackBar(
-                              //       const SnackBar(
-                              //         content: Text(
-                              //             'Estimation should include atleast one recipe.'),
-                              //       ),
-                              //     );
-                              //   }
-                              // },
-                              onPressed: () {
-                                setState(() {
-                                  // [TODO]nk: Clear values instead of delete row when length = 1
-                                  if (_recipes.length != 1) {
-                                    _recipes.removeAt(index);
-                                    if (_recipes.length == 1 &&
-                                        addButtonVisibility == true &&
-                                        _recipes[0].recipe == null) {
-                                      addButtonVisibility = false;
-                                    }
-                                  } else {
-                                    setState(() {
-                                      _recipes[index].nameController.clear();
-                                      _recipes[index].recipe = null;
-                                    });
-                                  }
-                                });
-                              },
+                          IconButton(
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.blue,
                             ),
+                            onPressed: () {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              setState(() {
+                                // [TODO]nk: Clear values instead of delete row when length = 1
+                                if (_recipes.length != 1) {
+                                  _recipes.removeAt(index);
+                                  if (_recipes.length == 1 &&
+                                      addButtonVisibility == true &&
+                                      _recipes[0].recipe == null) {
+                                    addButtonVisibility = false;
+                                  }
+                                } else {
+                                  setState(() {
+                                    _recipes[index].nameController.clear();
+                                    _recipes[index].recipe = null;
+                                  });
+                                }
+                              });
+                            },
                           ),
                         ],
                       ),
@@ -436,37 +366,46 @@ class _CreateEstimation extends State<CreateEstimation> {
                 ),
               ),
               Visibility(
-                  visible: addButtonVisibility,
+                  visible: !_recipes
+                      .any((element) => element.nameController.text.isEmpty),
                   child: Padding(
-                    padding: EdgeInsets.only(
-                        left: 20,
-                        right: MediaQuery.sizeOf(context).width * 0.7),
-                    child: TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _recipes
-                              .add(RecipeForEstimation(_recipes.length - 1));
-                        });
-                      },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Icon(Icons.add),
-                          Text('Add recipe'),
-                        ],
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                    ),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: SizedBox(
+                        width: 130,
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _recipes.add(
+                                  RecipeForEstimation(_recipes.length - 1));
+                            });
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Icon(Icons.add),
+                              Text('Add recipe'),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ))
             ],
           ),
           Visibility(
-            visible: getIngredientCount() != 0,
+            visible: getIngredientCount() != 0 &&
+                MediaQuery.of(context).viewInsets.bottom == 0,
             child: DraggableScrollableSheet(
-              initialChildSize: 0.4,
-              minChildSize: 0.4,
-              maxChildSize: 0.9,
+              initialChildSize: 0.1,
+              minChildSize: 0.1,
+              maxChildSize: 0.85,
               builder: (context, scrollController) {
                 return SingleChildScrollView(
+                  controller: scrollController,
                   child: Opacity(
                     opacity: 1,
                     child: Container(
@@ -490,16 +429,15 @@ class _CreateEstimation extends State<CreateEstimation> {
                           ]),
                       child: Column(
                         children: [
-                          Container(
+                          Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            child: Divider(
-                              thickness: 7,
-                              indent: MediaQuery.sizeOf(context).width * 0.45,
-                              endIndent:
-                                  MediaQuery.sizeOf(context).width * 0.45,
+                            child: Container(
+                              width: 40,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                color: Colors.black38,
+                              ),
                             ),
                           ),
                           const Text(
@@ -509,10 +447,9 @@ class _CreateEstimation extends State<CreateEstimation> {
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(
-                            height: MediaQuery.sizeOf(context).height,
+                            height: MediaQuery.sizeOf(context).height * 0.69,
                             child: ListView.builder(
-                              controller: scrollController,
-                              // shrinkWrap: true,
+                              shrinkWrap: true,
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               itemCount: getIngredientCount(),
                               itemBuilder: (context, index) {
@@ -527,7 +464,7 @@ class _CreateEstimation extends State<CreateEstimation> {
                                           fontWeight: FontWeight.w500),
                                     ),
                                     trailing: Text(
-                                      ingredients[index].quantity.toString(),
+                                      "${ingredients[index].quantity * _sampleSize} ${ingredients[index].ingredient.measuringUnit.abbr}",
                                       style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold),
