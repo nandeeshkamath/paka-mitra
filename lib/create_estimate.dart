@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
+import 'package:wing_cook/fragments/add_additional.dart';
+import 'package:wing_cook/fragments/done_action.dart';
 import 'package:wing_cook/model/recipe.dart';
 
 class CreateEstimation extends StatefulWidget {
@@ -66,29 +68,7 @@ class _CreateEstimation extends State<CreateEstimation> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Estimation'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: TextButton(
-                onPressed: () {},
-                style: ButtonStyle(
-                  backgroundColor:
-                      ButtonStyleButton.allOrNull<Color>(Colors.blue),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Text(
-                    'Done',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                )),
-          )
-        ],
+        actions: [DoneAction(title: 'Done', onPressed: () {})],
       ),
       body: Stack(
         children: [
@@ -366,34 +346,17 @@ class _CreateEstimation extends State<CreateEstimation> {
                 ),
               ),
               Visibility(
-                  visible: !_recipes
-                      .any((element) => element.nameController.text.isEmpty),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 20,
-                    ),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: SizedBox(
-                        width: 130,
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _recipes.add(
-                                  RecipeForEstimation(_recipes.length - 1));
-                            });
-                          },
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Icon(Icons.add),
-                              Text('Add recipe'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ))
+                visible: !_recipes
+                    .any((element) => element.nameController.text.isEmpty),
+                child: AddAdditional(
+                  title: 'Add recipe',
+                  onPressed: () {
+                    setState(() {
+                      _recipes.add(RecipeForEstimation(_recipes.length - 1));
+                    });
+                  },
+                ),
+              )
             ],
           ),
           Visibility(

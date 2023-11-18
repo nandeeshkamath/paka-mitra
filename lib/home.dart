@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:wing_cook/add_ingredient.dart';
 import 'package:wing_cook/add_recipe.dart';
 import 'package:wing_cook/create_estimate.dart';
+import 'package:wing_cook/database/ingredients_repository.dart';
+import 'package:wing_cook/database/recipe_ingredients_map_repository.dart';
+import 'package:wing_cook/database/recipe_repository.dart';
 import 'package:wing_cook/view_ingredients.dart';
 import 'package:wing_cook/view_recipes.dart';
 
@@ -54,12 +57,20 @@ class HomePage extends StatelessWidget {
         title: const Text('Paaka Mitra'),
         actions: [
           IconButton(
+            onPressed: () {
+              IngredientsRepository.deleteAll();
+              RecipesRepository.deleteAll();
+            },
+            icon: const Icon(Icons.delete_forever),
+          ),
+          IconButton(
             icon: const Icon(Icons.person),
             tooltip: 'Open profile',
             onPressed: () {},
           ),
         ],
       ),
+      backgroundColor: Colors.white,
       drawer: const Drawer(
         child: Column(
           children: [

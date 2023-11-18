@@ -49,6 +49,18 @@ class RecipesRepository {
     return _getListOfRecipe(recipes);
   }
 
+  static Future<List<Recipe>> getRecipesContainingIngredientId(
+      int ingredientId) async {
+    final db = await DatabaseHelper.db();
+    final recipeIngredientMap =
+        await RecipeIngredientsMapRepository.getRecipesIncludingIngredientId(
+            ingredientId);
+    final recipeIds = recipeIngredientMap.map((e) => e.recipeId).toList();
+    List<Map<String, dynamic>> recipes = await db
+        .query('recipes', where: "id in (?)", whereArgs: [recipeIds.join(",")]);
+    return _getListOfRecipe(recipes);
+  }
+
   static Future<List<Recipe>> _getListOfRecipe(
       List<Map<String, dynamic>> recipes) async {
     List<Recipe> recipeList = List.empty(growable: true);

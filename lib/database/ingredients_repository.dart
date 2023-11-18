@@ -32,6 +32,13 @@ class IngredientsRepository {
     return result.map((e) => toIngredient(e)).toList();
   }
 
+  static Future<bool> containsIngredient(String ingredientName) async {
+    final db = await DatabaseHelper.db();
+    final result = await db
+        .rawQuery('SELECT 1 from ingredients WHERE name = "$ingredientName"');
+    return result.isNotEmpty;
+  }
+
   static Future<int> updateIngredient(int id, String title,
       MeasuringUnit measuringUnit, String? description) async {
     final db = await DatabaseHelper.db();

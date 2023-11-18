@@ -25,6 +25,14 @@ class RecipeIngredientsMapRepository {
     return result.map((e) => toRecipeIngredientMap(e)).toList();
   }
 
+  static Future<List<RecipeIngredientMap>> getRecipesIncludingIngredientId(
+      int ingredientId) async {
+    final db = await DatabaseHelper.db();
+    List<Map<String, dynamic>> result = await db.query('recipe_ingredient_map',
+        where: "ingredientId = ?", whereArgs: [ingredientId]);
+    return result.map((e) => toRecipeIngredientMap(e)).toList();
+  }
+
   static Future<void> deleteIngredientIdToRecipeIdMapping(
       int recipeId, int ingredientId) async {
     final db = await DatabaseHelper.db();

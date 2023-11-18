@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wing_cook/database/ingredients_repository.dart';
+import 'package:wing_cook/fragments/done_action.dart';
 import 'package:wing_cook/model/ingredient.dart';
 
 class AddIngredient extends StatefulWidget {
@@ -26,26 +27,32 @@ class _AddIngredient extends State<AddIngredient> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Ingredient'),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              addIngredient(
-                Ingredient(
-                  _nameConstroller.text,
-                  _measuringUnit,
-                  _descriptionController.text,
-                ),
-              );
-            }
-
-            Navigator.pop(context);
-          },
-          child: const Icon(Icons.done),
-        ),
+        actions: [
+          DoneAction(
+            title: 'Add',
+            onPressed: () async {
+              if (!_formKey.currentState!.validate()) {
+                return;
+              }
+              IngredientsRepository.containsIngredient(_nameConstroller.text)
+                  .then((isDuplicate) {
+                if (isDuplicate) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Name already exists')),
+                  );
+                  return;
+                }
+                addIngredient(
+                  Ingredient(
+                    _nameConstroller.text,
+                    _measuringUnit,
+                    _descriptionController.text,
+                  ),
+                ).then((value) => Navigator.pop(context));
+              });
+            },
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -71,6 +78,7 @@ class _AddIngredient extends State<AddIngredient> {
                           hintText: 'Ingredient name',
                           border: InputBorder.none,
                         ),
+
                         // The validator receives the text that the user has entered.
                         validator: (value) {
                           if (value == null || value.isEmpty) {

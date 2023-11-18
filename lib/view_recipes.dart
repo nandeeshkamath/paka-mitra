@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wing_cook/add_recipe.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
+import 'package:wing_cook/fragments/view_list.dart';
 import 'package:wing_cook/model/recipe.dart';
 
 class ViewRecipes extends StatefulWidget {
@@ -61,84 +62,17 @@ class _ViewRecipes extends State<ViewRecipes> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Recipe>>(
-        future: _recipes,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+      body: ViewList(
+        items: _recipes,
+        onDelete: (id) {
+          if (id != null) {
+            RecipesRepository.delete(id);
           }
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            final data = snapshot.data ?? [];
-            return SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                left: 5,
-                right: 5,
-                top: 20,
-              ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: data.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      Container(
-                        height: 50,
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 2, horizontal: 5),
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 15),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Flex(
-                              direction: Axis.horizontal,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    data[index].name,
-                                    style: const TextStyle(
-                                      overflow: TextOverflow.ellipsis,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.edit),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      RecipesRepository.delete(
-                                        data[index].id,
-                                      );
-                                      _recipes.then(
-                                          (value) => value.removeAt(index));
-                                    });
-                                  },
-                                  icon: const Icon(Icons.delete),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Divider(
-                        indent: MediaQuery.sizeOf(context).width * 0.03,
-                        endIndent: MediaQuery.sizeOf(context).width * 0.03,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            );
-          }
+          return Future(() => true);
         },
+        getTitle: (item) => (item as Recipe).name,
+        getId: (item) => (item as Recipe).id,
+        getDescription: (item) => null,
       ),
     );
   }

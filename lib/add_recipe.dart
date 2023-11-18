@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:wing_cook/database/ingredients_repository.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
+import 'package:wing_cook/fragments/add_additional.dart';
+import 'package:wing_cook/fragments/done_action.dart';
+import 'package:wing_cook/fragments/sample_size_selector.dart';
 import 'package:wing_cook/model/ingredient.dart';
 import 'package:wing_cook/model/recipe.dart';
 import 'package:wing_cook/util.dart';
@@ -16,13 +19,14 @@ class AddRecipe extends StatefulWidget {
 
 class _AddRecipe extends State<AddRecipe> {
   final _recipeNameController = TextEditingController();
-  int _sampleSize = 25;
+  final int _sampleSize = 50;
   late List<Ingredient> _storedIngredients;
   final List<IngredientForRecipe> _ingredients =
       List<IngredientForRecipe>.generate(
           1, (index) => IngredientForRecipe(index));
   bool addButtonVisibility = false;
   final _formKey = GlobalKey<FormState>();
+  bool _stubVisibility = false;
 
   Future<void> addRecipe(Recipe recipe) async {
     await RecipesRepository.save(recipe);
@@ -38,6 +42,7 @@ class _AddRecipe extends State<AddRecipe> {
     final list = await IngredientsRepository.getIngredients();
     setState(() {
       _storedIngredients = list;
+      _stubVisibility = _storedIngredients.isEmpty;
     });
   }
 
@@ -48,7 +53,7 @@ class _AddRecipe extends State<AddRecipe> {
         title: const Text('Add Recipe'),
         actions: [
           Visibility(
-            visible: true,
+            visible: _stubVisibility,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5),
               child: IconButton(
@@ -66,88 +71,15 @@ class _AddRecipe extends State<AddRecipe> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: PopupMenuButton(
-              offset: const Offset(0, 45),
-              initialValue: _sampleSize.toString(),
-              tooltip: 'Sample size',
-              onSelected: (value) {
-                setState(() {
-                  final parsed = int.tryParse(value.toString());
-                  if (parsed != null) {
-                    _sampleSize = parsed;
-                  }
-                });
-              },
-              itemBuilder: (BuildContext context) {
-                return sampleSizes.map((int choice) {
-                  return PopupMenuItem<String>(
-                    value: choice.toString(),
-                    child: Text(choice.toString()),
-                  );
-                }).toList();
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(
-                      color: Colors.black12,
-                    )),
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.people_outline_sharp),
-                      const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 2)),
-                      Text(_sampleSize.toString()),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Visibility(
-              visible: addButtonVisibility,
-              child: FloatingActionButton(
-                heroTag: 'add_blank_ingredient',
-                onPressed: () {
-                  setState(() {
-                    _ingredients
-                        .add(IngredientForRecipe(_ingredients.length - 1));
-                  });
-                },
-                child: const Icon(Icons.add),
-              ),
-            ),
-            FloatingActionButton(
-              heroTag: 'add_recipe',
+          DoneAction(
+              title: 'Add',
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  addRecipe(
-                    Recipe(
-                      _recipeNameController.text,
-                      _sampleSize,
-                      toQuantifiedIngredients(_ingredients),
-                    ),
-                  );
-                }
-
-                Navigator.pop(context);
-              },
-              child: const Icon(Icons.done),
-            )
-          ],
-        ),
+                setState(() {
+                  _ingredients
+                      .add(IngredientForRecipe(_ingredients.length - 1));
+                });
+              })
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -155,11 +87,7 @@ class _AddRecipe extends State<AddRecipe> {
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5),
-                ),
                 TextFormField(
                   controller: _recipeNameController,
                   keyboardType: TextInputType.name,
@@ -178,7 +106,14 @@ class _AddRecipe extends State<AddRecipe> {
                   },
                 ),
                 const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 30),
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                ),
+                SampleSizeSelector(
+                  samples: sampleSizes,
+                  defaultSample: _sampleSize,
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15),
                 ),
                 ListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 5),
@@ -370,6 +305,14 @@ class _AddRecipe extends State<AddRecipe> {
                   },
                   shrinkWrap: true,
                 ),
+                AddAdditional(
+                    title: 'Add ingredient',
+                    onPressed: () {
+                      setState(() {
+                        _ingredients
+                            .add(IngredientForRecipe(_ingredients.length - 1));
+                      });
+                    })
               ],
             ),
           ),
