@@ -3,6 +3,7 @@ import 'package:wing_cook/add_ingredient.dart';
 import 'package:wing_cook/database/ingredients_repository.dart';
 import 'package:wing_cook/database/recipe_ingredients_map_repository.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
+import 'package:wing_cook/fragments/item_search_delegate.dart';
 import 'package:wing_cook/fragments/view_list.dart';
 import 'package:wing_cook/model/ingredient.dart';
 
@@ -43,10 +44,10 @@ class _ViewIngredients extends State<ViewIngredients> {
             IconButton(
               padding: const EdgeInsets.symmetric(horizontal: 5),
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => const AddIngredient()),
-                // );
+                _ingredients.then((value) => showSearch(
+                    context: context,
+                    delegate:
+                        ItemSearchDelegate(value.map((e) => e.name).toList())));
               },
               icon: const Icon(Icons.search),
             ),

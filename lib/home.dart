@@ -20,6 +20,7 @@ class HomePage extends StatelessWidget {
         side: const BorderSide(color: primary),
         borderRadius: BorderRadius.circular(25),
       ),
+      // color: Colors.black38,
       // color: Colors.lightBlue[100],
       child: TextButton(
         onPressed: () {

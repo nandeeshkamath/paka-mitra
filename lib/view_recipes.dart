@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wing_cook/add_recipe.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
+import 'package:wing_cook/fragments/item_search_delegate.dart';
 import 'package:wing_cook/fragments/view_list.dart';
 import 'package:wing_cook/model/recipe.dart';
 
@@ -41,10 +42,10 @@ class _ViewRecipes extends State<ViewRecipes> {
           IconButton(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => const AddIngredient()),
-              // );
+              _recipes.then((value) => showSearch(
+                  context: context,
+                  delegate:
+                      ItemSearchDelegate(value.map((e) => e.name).toList())));
             },
             icon: const Icon(Icons.search),
           ),
