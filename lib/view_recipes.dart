@@ -44,8 +44,8 @@ class _ViewRecipes extends State<ViewRecipes> {
             onPressed: () {
               _recipes.then((value) => showSearch(
                   context: context,
-                  delegate:
-                      ItemSearchDelegate(value.map((e) => e.name).toList())));
+                  delegate: ItemSearchDelegate(
+                      map: {"Recipes": value.map((e) => e.name).toList()})));
             },
             icon: const Icon(Icons.search),
           ),
