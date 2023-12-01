@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:wing_cook/add_ingredient.dart';
 import 'package:wing_cook/add_recipe.dart';
@@ -8,6 +6,7 @@ import 'package:wing_cook/create_estimate.dart';
 import 'package:wing_cook/database/ingredients_repository.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
 import 'package:wing_cook/fragments/item_search_delegate.dart';
+import 'package:wing_cook/fragments/search_box.dart';
 import 'package:wing_cook/model/ingredient.dart';
 import 'package:wing_cook/model/recipe.dart';
 import 'package:wing_cook/view_ingredients.dart';
@@ -51,7 +50,7 @@ class _HomePageState extends State<HomePage> {
       elevation: 20,
       // borderRadius: BorderRadius.circular(10),
       shape: RoundedRectangleBorder(
-        side: const BorderSide(color: primary),
+        side: const BorderSide(color: tertiary),
         borderRadius: BorderRadius.circular(25),
       ),
       // color: Colors.black38,
@@ -66,7 +65,7 @@ class _HomePageState extends State<HomePage> {
           }
         },
         style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all(Colors.black),
+          foregroundColor: MaterialStateProperty.all(primary),
           overlayColor: MaterialStateProperty.all(Colors.transparent),
         ),
         child: GridTile(
@@ -78,7 +77,7 @@ class _HomePageState extends State<HomePage> {
           ),
           child: Icon(
             icon,
-            color: Colors.indigo[500],
+            color: primary,
             size: 70,
           ),
         ),
@@ -90,14 +89,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     return Container(
-      color: Colors.white,
+      color: background,
       child: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: primary,
+            backgroundColor: secondary,
             elevation: 20,
             expandedHeight: size.height * 0.3,
-            collapsedHeight: 150,
+            collapsedHeight: 140,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(20),
@@ -108,15 +107,30 @@ class _HomePageState extends State<HomePage> {
             // snap: true,
             floating: true,
             leading: const Icon(Icons.menu),
-            flexibleSpace: const FlexibleSpaceBar(
+            flexibleSpace: FlexibleSpaceBar(
               expandedTitleScale: 1.75,
               centerTitle: true,
-              titlePadding: EdgeInsets.only(
-                // left: 15,
-                bottom: 105,
+              background: ShaderMask(
+                shaderCallback: (rect) {
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black, Colors.transparent],
+                  ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                },
+                blendMode: BlendMode.dstIn,
+                child: Image.asset(
+                  'images/paaka_home.jpg',
+                  // height: 400,
+                  // opacity: const AlwaysStoppedAnimation(.9),
+                  fit: BoxFit.contain,
+                ),
               ),
-              title: Text(
-                "PAAKA MITRA",
+              titlePadding: const EdgeInsets.only(
+                bottom: 90,
+              ),
+              title: const Text(
+                "ಪಾಕಮಿತ್ರ",
                 // textScaleFactor: 1.0,
                 style: TextStyle(
                   fontSize: 22,
@@ -127,60 +141,23 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(0),
+              preferredSize: const Size.fromHeight(-10),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                 alignment: Alignment.bottomLeft,
-                child: Material(
-                  elevation: 20,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50)),
-                  child: GestureDetector(
-                    onTap: () {
-                      Map<String, List<String>> items = {};
+                child: SearchBox(onTap: () {
+                  Map<String, List<String>> items = {};
 
-                      _ingredients
-                          .then((value) => items["Ingredients"] =
-                              value.map((e) => e.name).toList())
-                          .then((value) => _recipes.then((value) =>
-                              items["Recipes"] =
-                                  value.map((e) => e.name).toList()))
-                          .then((value) => showSearch(
-                              context: context,
-                              delegate: ItemSearchDelegate(map: items)));
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 50,
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.only(left: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: const Text(
-                        "Search",
-                        textScaleFactor: 1.2,
-                        style: TextStyle(color: Colors.black54),
-                      ),
-                    ),
-                  ),
-                  // child: TextField(
-                  //   decoration: InputDecoration(
-                  //     fillColor: Colors.white,
-                  //     filled: true,
-                  //     hintText: "Search",
-                  //     contentPadding: const EdgeInsets.symmetric(
-                  //         horizontal: 20, vertical: 13),
-                  //     border: OutlineInputBorder(
-                  //       borderRadius: BorderRadius.circular(50),
-                  //       // borderSide: const BorderSide(color: primary),
-                  //     ),
-                  //     isDense: true,
-                  //   ),
-                  // ),
-                ),
+                  _ingredients
+                      .then((value) => items["Ingredients"] =
+                          value.map((e) => e.name).toList())
+                      .then((value) => _recipes.then((value) =>
+                          items["Recipes"] = value.map((e) => e.name).toList()))
+                      .then((value) => showSearch(
+                          context: context,
+                          delegate: ItemSearchDelegate(map: items)));
+                }),
               ),
             ),
             actions: [

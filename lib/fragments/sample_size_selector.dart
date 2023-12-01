@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wing_cook/constants/app_theme.dart';
 
 class SampleSizeSelector extends StatefulWidget {
   const SampleSizeSelector({
@@ -46,11 +47,11 @@ class _SampleSizeSelectorState extends State<SampleSizeSelector> {
                 width: 50,
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: Colors.blue,
+                    color: tertiary,
                     width: 1.5,
                   ),
                   borderRadius: BorderRadius.circular(10),
-                  color: selectedSample == sample ? Colors.blue : null,
+                  color: selectedSample == sample ? secondary : null,
                 ),
                 child: Center(
                   child: Text(
@@ -58,8 +59,8 @@ class _SampleSizeSelectorState extends State<SampleSizeSelector> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: selectedSample == sample
-                          ? Colors.black87
-                          : Colors.black54,
+                          ? primary
+                          : primary.withOpacity(0.8),
                     ),
                   ),
                 ),

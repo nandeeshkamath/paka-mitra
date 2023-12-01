@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:wing_cook/constants/app_theme.dart';
 import 'package:wing_cook/database/ingredients_repository.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
 import 'package:wing_cook/fragments/add_additional.dart';
-import 'package:wing_cook/fragments/done_action.dart';
 import 'package:wing_cook/fragments/sample_size_selector.dart';
+import 'package:wing_cook/model/bottom_button.dart';
 import 'package:wing_cook/model/ingredient.dart';
 import 'package:wing_cook/model/recipe.dart';
 import 'package:wing_cook/util.dart';
@@ -50,6 +51,7 @@ class _AddRecipe extends State<AddRecipe> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: secondary,
         title: const Text('Add Recipe'),
         actions: [
           Visibility(
@@ -71,274 +73,299 @@ class _AddRecipe extends State<AddRecipe> {
               ),
             ),
           ),
-          DoneAction(
-              title: 'Add',
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  addRecipe(
-                    Recipe(
-                      _recipeNameController.text,
-                      _sampleSize,
-                      toQuantifiedIngredients(_ingredients),
-                    ),
-                  );
-                }
-
-                Navigator.pop(context);
-              })
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _recipeNameController,
-                  keyboardType: TextInputType.name,
-                  style: const TextStyle(
-                    fontSize: 20,
-                  ),
-                  decoration: const InputDecoration(
-                    hintText: 'Recipe name',
-                    border: InputBorder.none,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter some text';
-                    }
-                    return null;
-                  },
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                ),
-                SampleSizeSelector(
-                  samples: sampleSizes,
-                  defaultSample: _sampleSize,
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                ),
-                ListView.builder(
-                  padding: const EdgeInsets.only(top: 5),
-                  itemCount: _ingredients.length,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    return Container(
-                      key: ValueKey(_ingredients[index].index),
-                      // padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Autocomplete<Ingredient>(
-                        optionsBuilder: (TextEditingValue editingValue) {
-                          if (editingValue.text == '') {
-                            return const Iterable<Ingredient>.empty();
-                          }
-                          return _storedIngredients.where((Ingredient option) {
-                            return option.name
-                                .toLowerCase()
-                                .contains(editingValue.text.toLowerCase());
-                          });
-                        },
-                        onSelected: (Ingredient value) {
-                          setState(
-                            () {
-                              _ingredients[index].name = value.name;
-                              _ingredients[index].id = value.id;
-
-                              if (_ingredients.length == 1 &&
-                                  addButtonVisibility == false) {
-                                addButtonVisibility = true;
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _recipeNameController,
+                      keyboardType: TextInputType.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                      ),
+                      decoration: const InputDecoration(
+                        hintText: 'Recipe name',
+                        border: InputBorder.none,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                        return null;
+                      },
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                    ),
+                    SampleSizeSelector(
+                      samples: sampleSizes,
+                      defaultSample: _sampleSize,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                    ),
+                    ListView.builder(
+                      padding: const EdgeInsets.only(top: 5),
+                      itemCount: _ingredients.length,
+                      itemBuilder: (BuildContext ctx, int index) {
+                        return Container(
+                          key: ValueKey(_ingredients[index].index),
+                          // padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: Autocomplete<Ingredient>(
+                            optionsBuilder: (TextEditingValue editingValue) {
+                              if (editingValue.text == '') {
+                                return const Iterable<Ingredient>.empty();
                               }
+                              return _storedIngredients
+                                  .where((Ingredient option) {
+                                return option.name
+                                    .toLowerCase()
+                                    .contains(editingValue.text.toLowerCase());
+                              });
                             },
-                          );
-                        },
-                        fieldViewBuilder: (context, textEditingController,
-                            focusNode, onFieldSubmitted) {
-                          _ingredients[index].nameController =
-                              textEditingController;
-                          return SizedBox(
-                            width: MediaQuery.sizeOf(context).width,
-                            child: TextField(
-                              focusNode: focusNode,
-                              controller: textEditingController,
-                              onEditingComplete: () {
-                                _ingredients[index].name =
-                                    textEditingController.text;
-                                onFieldSubmitted();
-                              },
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Ingredient name',
-                                  suffix: SizedBox(
-                                    width: 150,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        SizedBox(
-                                          width: 100,
-                                          child: TextFormField(
-                                            controller: _ingredients[index]
-                                                .quantityController,
-                                            textAlign: TextAlign.center,
-                                            keyboardType: const TextInputType
-                                                .numberWithOptions(),
-                                            decoration: InputDecoration(
-                                                border: InputBorder.none,
-                                                hintText: 'Quantity',
-                                                suffix: PopupMenuButton(
-                                                  initialValue:
-                                                      _ingredients[index]
-                                                          .measuringUnit
-                                                          .value,
-                                                  offset: const Offset(0, 45),
-                                                  tooltip: 'Unit scale',
-                                                  onSelected: (value) {
-                                                    setState(() {
-                                                      _ingredients[index]
-                                                              .measuringUnit =
-                                                          toMeasuringUnit(
-                                                              value);
-                                                    });
-                                                  },
-                                                  itemBuilder:
-                                                      (BuildContext context) {
-                                                    return MeasuringUnit.values
-                                                        .map((MeasuringUnit
-                                                            choice) {
-                                                      return PopupMenuItem<
-                                                          String>(
-                                                        value: choice.value,
-                                                        child: Text(
-                                                            "${choice.value} (${choice.abbr})"),
-                                                      );
-                                                    }).toList();
-                                                  },
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              5),
-                                                      border: Border.all(
-                                                          color:
-                                                              Colors.black12),
-                                                    ),
-                                                    child: Container(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      height: 30,
-                                                      width: 30,
-                                                      child: Text(
+                            onSelected: (Ingredient value) {
+                              setState(
+                                () {
+                                  _ingredients[index].name = value.name;
+                                  _ingredients[index].id = value.id;
+
+                                  if (_ingredients.length == 1 &&
+                                      addButtonVisibility == false) {
+                                    addButtonVisibility = true;
+                                  }
+                                },
+                              );
+                            },
+                            fieldViewBuilder: (context, textEditingController,
+                                focusNode, onFieldSubmitted) {
+                              _ingredients[index].nameController =
+                                  textEditingController;
+                              return SizedBox(
+                                width: MediaQuery.sizeOf(context).width,
+                                child: TextField(
+                                  focusNode: focusNode,
+                                  controller: textEditingController,
+                                  onEditingComplete: () {
+                                    _ingredients[index].name =
+                                        textEditingController.text;
+                                    onFieldSubmitted();
+                                  },
+                                  decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: 'Ingredient name',
+                                      suffix: SizedBox(
+                                        width: 150,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            SizedBox(
+                                              width: 100,
+                                              child: TextFormField(
+                                                controller: _ingredients[index]
+                                                    .quantityController,
+                                                textAlign: TextAlign.center,
+                                                keyboardType:
+                                                    const TextInputType
+                                                        .numberWithOptions(),
+                                                decoration: InputDecoration(
+                                                    border: InputBorder.none,
+                                                    hintText: 'Quantity',
+                                                    suffix: PopupMenuButton(
+                                                      initialValue:
                                                           _ingredients[index]
                                                               .measuringUnit
-                                                              .abbr),
-                                                    ),
-                                                  ),
-                                                )),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                if (isNumeric(value)) {
-                                                  double? parsed =
-                                                      double.tryParse(value);
-                                                  _ingredients[index].quantity =
-                                                      parsed;
+                                                              .value,
+                                                      offset:
+                                                          const Offset(0, 45),
+                                                      tooltip: 'Unit scale',
+                                                      onSelected: (value) {
+                                                        setState(() {
+                                                          _ingredients[index]
+                                                                  .measuringUnit =
+                                                              toMeasuringUnit(
+                                                                  value);
+                                                        });
+                                                      },
+                                                      itemBuilder: (BuildContext
+                                                          context) {
+                                                        return MeasuringUnit
+                                                            .values
+                                                            .map((MeasuringUnit
+                                                                choice) {
+                                                          return PopupMenuItem<
+                                                              String>(
+                                                            value: choice.value,
+                                                            child: Text(
+                                                                "${choice.value} (${choice.abbr})"),
+                                                          );
+                                                        }).toList();
+                                                      },
+                                                      child: Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(5),
+                                                          border: Border.all(
+                                                              color: Colors
+                                                                  .black12),
+                                                        ),
+                                                        child: Container(
+                                                          alignment:
+                                                              Alignment.center,
+                                                          height: 30,
+                                                          width: 30,
+                                                          child: Text(
+                                                              _ingredients[
+                                                                      index]
+                                                                  .measuringUnit
+                                                                  .abbr),
+                                                        ),
+                                                      ),
+                                                    )),
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    if (isNumeric(value)) {
+                                                      double? parsed =
+                                                          double.tryParse(
+                                                              value);
+                                                      _ingredients[index]
+                                                          .quantity = parsed;
 
-                                                  if (_ingredients.length ==
-                                                          1 &&
-                                                      parsed != null &&
-                                                      addButtonVisibility ==
-                                                          false) {
-                                                    addButtonVisibility = true;
+                                                      if (_ingredients.length ==
+                                                              1 &&
+                                                          parsed != null &&
+                                                          addButtonVisibility ==
+                                                              false) {
+                                                        addButtonVisibility =
+                                                            true;
+                                                      }
+                                                    }
+                                                  });
+                                                },
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty) {
+                                                    return 'Please enter some text';
                                                   }
-                                                }
-                                              });
-                                            },
-                                            validator: (value) {
-                                              if (value == null ||
-                                                  value.isEmpty) {
-                                                return 'Please enter some text';
-                                              }
-                                              if (!isNumeric(value)) {
-                                                return 'Please enter a numeric value';
-                                              }
-                                              return null;
-                                            },
-                                          ),
+                                                  if (!isNumeric(value)) {
+                                                    return 'Please enter a numeric value';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                            IconButton(
+                                              color: Colors.blue,
+                                              icon: const Icon(Icons.remove),
+                                              onPressed: () {
+                                                setState(() {
+                                                  if (_ingredients.length !=
+                                                      1) {
+                                                    _ingredients
+                                                        .removeAt(index);
+                                                    if (_ingredients.length ==
+                                                            1 &&
+                                                        addButtonVisibility ==
+                                                            true &&
+                                                        (_ingredients[0].name ==
+                                                                null &&
+                                                            _ingredients[0]
+                                                                    .quantity ==
+                                                                null)) {
+                                                      addButtonVisibility =
+                                                          false;
+                                                    }
+                                                  } else {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                          content: Text(
+                                                              'Recipe should include atleast one ingredient.')),
+                                                    );
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                          ],
                                         ),
-                                        IconButton(
-                                          color: Colors.blue,
-                                          icon: const Icon(Icons.remove),
-                                          onPressed: () {
-                                            setState(() {
-                                              if (_ingredients.length != 1) {
-                                                _ingredients.removeAt(index);
-                                                if (_ingredients.length == 1 &&
-                                                    addButtonVisibility ==
-                                                        true &&
-                                                    (_ingredients[0].name ==
-                                                            null &&
-                                                        _ingredients[0]
-                                                                .quantity ==
-                                                            null)) {
-                                                  addButtonVisibility = false;
-                                                }
-                                              } else {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                      content: Text(
-                                                          'Recipe should include atleast one ingredient.')),
-                                                );
-                                              }
-                                            });
-                                          },
+                                      )),
+                                ),
+                              );
+                            },
+                            optionsViewBuilder: (context, onSelected, options) {
+                              return Material(
+                                child: ListView.separated(
+                                  separatorBuilder: (context, index) =>
+                                      const Divider(),
+                                  itemBuilder: (context, index) {
+                                    final ingredient = options.elementAt(index);
+                                    return GestureDetector(
+                                      onTap: () {
+                                        onSelected(ingredient);
+                                      },
+                                      child: ListTile(
+                                        title: Text(
+                                          ingredient.name,
                                         ),
-                                      ],
-                                    ),
-                                  )),
-                            ),
-                          );
-                        },
-                        optionsViewBuilder: (context, onSelected, options) {
-                          return Material(
-                            child: ListView.separated(
-                              separatorBuilder: (context, index) =>
-                                  const Divider(),
-                              itemBuilder: (context, index) {
-                                final ingredient = options.elementAt(index);
-                                return GestureDetector(
-                                  onTap: () {
-                                    onSelected(ingredient);
+                                      ),
+                                    );
                                   },
-                                  child: ListTile(
-                                    title: Text(
-                                      ingredient.name,
-                                    ),
-                                  ),
-                                );
-                              },
-                              itemCount: options.length,
-                            ),
-                          );
-                        },
-                        displayStringForOption: (option) => option.name,
-                      ),
-                    );
-                  },
-                  shrinkWrap: true,
+                                  itemCount: options.length,
+                                ),
+                              );
+                            },
+                            displayStringForOption: (option) => option.name,
+                          ),
+                        );
+                      },
+                      shrinkWrap: true,
+                    ),
+                    AddAdditional(
+                        title: 'Add ingredient',
+                        onPressed: () {
+                          setState(() {
+                            _ingredients.add(
+                                IngredientForRecipe(_ingredients.length - 1));
+                          });
+                        })
+                  ],
                 ),
-                AddAdditional(
-                    title: 'Add ingredient',
-                    onPressed: () {
-                      setState(() {
-                        _ingredients
-                            .add(IngredientForRecipe(_ingredients.length - 1));
-                      });
-                    })
-              ],
+              ),
             ),
           ),
-        ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: BottomButton(
+                title: 'Add',
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    addRecipe(
+                      Recipe(
+                        _recipeNameController.text,
+                        _sampleSize,
+                        toQuantifiedIngredients(_ingredients),
+                      ),
+                    );
+                  }
+
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

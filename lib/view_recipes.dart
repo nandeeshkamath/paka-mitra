@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wing_cook/add_recipe.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
 import 'package:wing_cook/fragments/item_search_delegate.dart';
-import 'package:wing_cook/fragments/view_list.dart';
+import 'package:wing_cook/fragments/view_sliver.dart';
 import 'package:wing_cook/model/recipe.dart';
 
 class ViewRecipes extends StatefulWidget {
@@ -35,46 +35,26 @@ class _ViewRecipes extends State<ViewRecipes> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recipes'),
-        actions: [
-          IconButton(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            onPressed: () {
-              _recipes.then((value) => showSearch(
-                  context: context,
-                  delegate: ItemSearchDelegate(
-                      map: {"Recipes": value.map((e) => e.name).toList()})));
-            },
-            icon: const Icon(Icons.search),
+    return ViewScrollView(
+      title: 'Recipes',
+      onAddPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AddRecipe(),
           ),
-          IconButton(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddRecipe(),
-                ),
-              ).then((value) => refresh());
-            },
-            icon: const Icon(Icons.add),
-          ),
-        ],
-      ),
-      body: ViewList(
-        items: _recipes,
-        onDelete: (id) {
-          if (id != null) {
-            RecipesRepository.delete(id);
-          }
-          return Future(() => true);
-        },
-        getTitle: (item) => (item as Recipe).name,
-        getId: (item) => (item as Recipe).id,
-        getDescription: (item) => null,
-      ),
+        ).then((value) => refresh());
+      },
+      onSearchTap: () {
+        _recipes.then((value) => showSearch(
+            context: context,
+            delegate: ItemSearchDelegate(
+                map: {"Recipes": value.map((e) => e.name).toList()})));
+      },
+      items: _recipes,
+      getTitle: (item) => (item as Recipe).name,
+      getId: (item) => (item as Recipe).id,
+      getDescription: (item) => null,
     );
   }
 }

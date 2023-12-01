@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:wing_cook/constants/app_theme.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
 import 'package:wing_cook/fragments/add_additional.dart';
-import 'package:wing_cook/fragments/done_action.dart';
+import 'package:wing_cook/fragments/sample_size_selector.dart';
+import 'package:wing_cook/model/bottom_button.dart';
 import 'package:wing_cook/model/recipe.dart';
 
 class CreateEstimation extends StatefulWidget {
@@ -15,7 +17,7 @@ class CreateEstimation extends StatefulWidget {
 
 class _CreateEstimation extends State<CreateEstimation> {
   final _recipeNameController = TextEditingController();
-  int _sampleSize = sampleSizes.elementAt(0);
+  final int _sampleSize = sampleSizes.elementAt(0);
   late List<Recipe> _storedRecipes;
   final List<RecipeForEstimation> _recipes = List<RecipeForEstimation>.generate(
       1, (index) => RecipeForEstimation(index));
@@ -67,8 +69,8 @@ class _CreateEstimation extends State<CreateEstimation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: secondary,
         title: const Text('Create Estimation'),
-        actions: [DoneAction(title: 'Done', onPressed: () {})],
       ),
       body: Stack(
         children: [
@@ -94,65 +96,10 @@ class _CreateEstimation extends State<CreateEstimation> {
                   },
                 ),
               ),
-              SizedBox(
-                height: 40,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Tooltip(
-                      message: 'Estimation size',
-                      child: Icon(
-                        Icons.people_outline_sharp,
-                      ),
-                    ),
-                    ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemCount: sampleSizes.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5),
-                          child: Material(
-                            elevation: 5,
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 60,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.blue,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                color:
-                                    _sampleSize == sampleSizes.elementAt(index)
-                                        ? Colors.blue
-                                        : null,
-                              ),
-                              child: TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _sampleSize = sampleSizes.elementAt(index);
-                                  });
-                                },
-                                child: Text(
-                                  sampleSizes.elementAt(index).toString(),
-                                  style: TextStyle(
-                                    // fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: _sampleSize ==
-                                            sampleSizes.elementAt(index)
-                                        ? Colors.black87
-                                        : Colors.black54,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: SampleSizeSelector(
+                    samples: sampleSizes, defaultSample: _sampleSize),
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 15),
@@ -317,7 +264,7 @@ class _CreateEstimation extends State<CreateEstimation> {
                           IconButton(
                             icon: const Icon(
                               Icons.close,
-                              color: Colors.blue,
+                              color: primary,
                             ),
                             onPressed: () {
                               FocusManager.instance.primaryFocus?.unfocus();
@@ -445,6 +392,16 @@ class _CreateEstimation extends State<CreateEstimation> {
               },
             ),
           ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: BottomButton(
+                title: 'Create',
+                onPressed: () {},
+              ),
+            ),
+          )
         ],
       ),
     );

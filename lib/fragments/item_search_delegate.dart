@@ -119,12 +119,12 @@ class ItemSearchDelegate extends SearchDelegate {
                         //   backgroundColor: MaterialStateProperty.all(primary),
                         //   foregroundColor: MaterialStateProperty.all(Colors.black),
                         // ),
-                        backgroundColor: primary.withOpacity(0.8),
+                        backgroundColor: primary,
                         elevation: 5,
 
                         label: Text(
                           result,
-                          style: const TextStyle(color: Colors.black),
+                          style: const TextStyle(color: textOnPrimary),
                         ),
                       ),
                     );
