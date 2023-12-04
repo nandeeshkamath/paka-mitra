@@ -28,10 +28,6 @@ class _AddIngredient extends State<AddIngredient> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: secondary,
-        // shape: const RoundedRectangleBorder(
-        //     borderRadius: BorderRadius.only(
-        //         bottomLeft: Radius.circular(16),
-        //         bottomRight: Radius.circular(16))),
         title: const Text('Add Ingredient'),
       ),
       body: Stack(

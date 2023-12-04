@@ -29,14 +29,16 @@ class ItemSearchDelegate extends SearchDelegate {
   @override
   Widget buildResults(BuildContext context) {
     Map<String, List<String>> matchQuery = {};
-    map.forEach((key, value) {
-      matchQuery[key] = [];
-      for (var item in value) {
-        if (item.toLowerCase().contains(query.toLowerCase())) {
-          matchQuery[key]!.add(item);
+    if (query.isNotEmpty) {
+      map.forEach((key, value) {
+        matchQuery[key] = [];
+        for (var item in value) {
+          if (item.toLowerCase().contains(query.toLowerCase())) {
+            matchQuery[key]!.add(item);
+          }
         }
-      }
-    });
+      });
+    }
     return ListView.builder(
       shrinkWrap: true,
       itemCount: matchQuery.length,
@@ -59,28 +61,22 @@ class ItemSearchDelegate extends SearchDelegate {
         );
       },
     );
-    // return ListView.builder(
-    //   itemCount: matchQuery.length,
-    //   itemBuilder: (context, index) {
-    //     var result = matchQuery[index];
-    //     return ListTile(
-    //       title: Text(result),
-    //     );
-    //   },
-    // );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     Map<String, List<String>> matchQuery = {};
-    map.forEach((key, value) {
-      matchQuery[key] = [];
-      for (var item in value) {
-        if (item.toLowerCase().contains(query.toLowerCase())) {
-          matchQuery[key]!.add(item);
+    if (query.isNotEmpty) {
+      map.forEach((key, value) {
+        matchQuery[key] = [];
+        for (var item in value) {
+          if (item.toLowerCase().contains(query.toLowerCase())) {
+            matchQuery[key]!.add(item);
+          }
         }
-      }
-    });
+      });
+    }
+
     return ListView.builder(
       shrinkWrap: true,
       itemCount: matchQuery.length,
