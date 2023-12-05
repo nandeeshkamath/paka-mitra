@@ -39,19 +39,18 @@ class IngredientsRepository {
     return result.isNotEmpty;
   }
 
-  static Future<int> updateIngredient(int id, String title,
-      MeasuringUnit measuringUnit, String? description) async {
+  static Future<int> updateIngredient(Ingredient ingredient) async {
     final db = await DatabaseHelper.db();
 
     final data = {
-      'title': title,
-      'measuringUnit': measuringUnit,
-      'description': description,
+      'name': ingredient.name,
+      'measuringUnit': ingredient.measuringUnit.value,
+      'description': ingredient.description,
       'updatedAt': DateTime.now().toString()
     };
 
-    final result =
-        await db.update('ingredients', data, where: "id = ?", whereArgs: [id]);
+    final result = await db.update('ingredients', data,
+        where: "id = ?", whereArgs: [ingredient.id]);
     return result;
   }
 

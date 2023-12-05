@@ -45,6 +45,20 @@ class _ViewRecipes extends State<ViewRecipes> {
           ),
         ).then((value) => refresh());
       },
+      onItemTap: (itemRaw) {
+        final item = itemRaw as Recipe;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddRecipe(
+              id: item.id,
+              name: item.name,
+              sampleSize: item.sampleSize,
+              ingredients: item.ingredients,
+            ),
+          ),
+        );
+      },
       onSearchTap: () {
         _recipes.then((value) => showSearch(
             context: context,
@@ -54,7 +68,10 @@ class _ViewRecipes extends State<ViewRecipes> {
       items: _recipes,
       getTitle: (item) => (item as Recipe).name,
       getId: (item) => (item as Recipe).id,
-      getDescription: (item) => null,
+      getDescription: (item) {
+        final recipe = (item as Recipe);
+        return recipe.ingredients.map((e) => e.ingredient.name).join(", ");
+      },
     );
   }
 }

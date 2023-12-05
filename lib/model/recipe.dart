@@ -63,9 +63,13 @@ Set<Recipe> stubRecipes() {
       50,
       {
         QuantifiedIngredient(
-            Ingredient('Toor Dal', MeasuringUnit.kilogram, null), 5.5),
+            Ingredient('Toor Dal', MeasuringUnit.kilogram,
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."),
+            5.5),
         QuantifiedIngredient(
-            Ingredient('Sambar Powder', MeasuringUnit.kilogram, null), 3.1),
+            Ingredient('Sambar Powder', MeasuringUnit.kilogram,
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."),
+            3.1),
         // QuantifiedIngredient(
         //     Ingredient('Coconut grating', MeasuringUnit.kilogram, null), 1.5),
         // QuantifiedIngredient(
@@ -77,9 +81,13 @@ Set<Recipe> stubRecipes() {
       50,
       {
         QuantifiedIngredient(
-            Ingredient('Rava', MeasuringUnit.kilogram, null), 5.7),
+            Ingredient('Rava', MeasuringUnit.kilogram,
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."),
+            5.7),
         QuantifiedIngredient(
-            Ingredient('Coconut grating', MeasuringUnit.kilogram, null), 3.5),
+            Ingredient('Coconut grating', MeasuringUnit.kilogram,
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."),
+            3.5),
         // QuantifiedIngredient(
         //     Ingredient('Coconut oil', MeasuringUnit.liter, null), 1.8),
       },
@@ -91,7 +99,9 @@ Set<Recipe> stubRecipes() {
         QuantifiedIngredient(
             Ingredient('White rice', MeasuringUnit.kilogram, null), 10.9),
         QuantifiedIngredient(
-            Ingredient('Turmeric', MeasuringUnit.kilogram, null), 0.5),
+            Ingredient('Turmeric', MeasuringUnit.kilogram,
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."),
+            0.5),
         // QuantifiedIngredient(
         //     Ingredient('Coconut oil', MeasuringUnit.liter, null), 1.3),
       },

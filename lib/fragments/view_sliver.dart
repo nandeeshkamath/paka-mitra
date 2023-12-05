@@ -9,6 +9,7 @@ class ViewScrollView extends StatelessWidget {
       required this.title,
       required this.onAddPressed,
       required this.onSearchTap,
+      required this.onItemTap,
       required this.items,
       required this.getTitle,
       required this.getDescription,
@@ -19,6 +20,7 @@ class ViewScrollView extends StatelessWidget {
 
   final VoidCallback onAddPressed;
   final VoidCallback onSearchTap;
+  final Function(dynamic item) onItemTap;
   final String Function(dynamic item) getTitle;
   final String? Function(dynamic item) getDescription;
   final int Function(dynamic item) getId;
@@ -26,13 +28,21 @@ class ViewScrollView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const physics = ScrollPhysics();
-    return Container(
-      color: background,
-      child: CustomScrollView(
+    return Scaffold(
+      backgroundColor: background,
+      floatingActionButton: FloatingActionButton(
+        onPressed: onAddPressed,
+        backgroundColor: secondary,
+        child: const Icon(
+          Icons.add,
+          color: primary,
+        ),
+      ),
+      body: CustomScrollView(
         physics: physics,
         slivers: [
           SliverAppBar(
-            title: const Text('Ingredients'),
+            title: Text(title),
             expandedHeight: 140,
             collapsedHeight: 100,
             elevation: 20,
@@ -43,13 +53,6 @@ class ViewScrollView extends StatelessWidget {
                 bottomRight: Radius.circular(20),
               ),
             ),
-            actions: [
-              IconButton(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                onPressed: onAddPressed,
-                icon: const Icon(Icons.add),
-              ),
-            ],
             pinned: true,
             // snap: true,
             floating: true,
@@ -74,6 +77,7 @@ class ViewScrollView extends StatelessWidget {
                     getId: getId,
                     getTitle: getTitle,
                     getDescription: getDescription,
+                    onTap: onItemTap,
                   ),
                 ),
               ],

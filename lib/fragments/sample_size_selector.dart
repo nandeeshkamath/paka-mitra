@@ -6,11 +6,13 @@ class SampleSizeSelector extends StatefulWidget {
     Key? key,
     required this.samples,
     required this.defaultSample,
+    required this.onChanged,
     this.toolTip,
   }) : super(key: key);
   final String? toolTip;
   final Set<int> samples;
   final int defaultSample;
+  final Function(int changed) onChanged;
 
   @override
   State<SampleSizeSelector> createState() => _SampleSizeSelectorState();
@@ -20,11 +22,12 @@ class _SampleSizeSelectorState extends State<SampleSizeSelector> {
   // _SampleSizeSelectorState({
   //   required this.selectedSample,
   // });
-  late int selectedSample;
+  int selectedSample = 50;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
+
     setState(() {
       selectedSample = widget.defaultSample;
     });
@@ -40,6 +43,7 @@ class _SampleSizeSelectorState extends State<SampleSizeSelector> {
               onTap: () {
                 setState(() {
                   selectedSample = sample;
+                  widget.onChanged(sample);
                 });
               },
               child: Container(

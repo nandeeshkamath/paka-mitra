@@ -10,7 +10,12 @@ import 'package:wing_cook/model/recipe.dart';
 import 'package:wing_cook/util.dart';
 
 class AddRecipe extends StatefulWidget {
-  const AddRecipe({super.key});
+  const AddRecipe(
+      {super.key, this.id, this.name, this.sampleSize, this.ingredients});
+  final int? id;
+  final String? name;
+  final int? sampleSize;
+  final Set<QuantifiedIngredient>? ingredients;
 
   @override
   State<StatefulWidget> createState() {
@@ -19,18 +24,55 @@ class AddRecipe extends StatefulWidget {
 }
 
 class _AddRecipe extends State<AddRecipe> {
+  int _id = 0;
   final _recipeNameController = TextEditingController();
-  final int _sampleSize = 50;
+  int _sampleSize = 50;
   late List<Ingredient> _storedIngredients;
-  final List<IngredientForRecipe> _ingredients =
-      List<IngredientForRecipe>.generate(
-          1, (index) => IngredientForRecipe(index));
+  List<IngredientForRecipe> _ingredients = List<IngredientForRecipe>.generate(
+      1, (index) => IngredientForRecipe(index));
   bool addButtonVisibility = false;
   final _formKey = GlobalKey<FormState>();
   bool _stubVisibility = false;
 
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      if (widget.id != null) {
+        _id = widget.id!;
+      }
+      if (widget.name != null) {
+        _recipeNameController.text = widget.name!;
+      }
+      if (widget.sampleSize != null) {
+        _sampleSize = widget.sampleSize!;
+      }
+      if (widget.ingredients != null) {
+        final List<IngredientForRecipe> list = [];
+        for (var i = 0; i < widget.ingredients!.length; i++) {
+          final ingredient = widget.ingredients!.elementAt(i);
+          final newIngredient = IngredientForRecipe(i);
+          newIngredient.id = ingredient.ingredient.id;
+          newIngredient.nameController.text =
+              ingredient.ingredient.name.toString();
+          newIngredient.name = ingredient.ingredient.name;
+          newIngredient.quantityController.text =
+              ingredient.quantity.toString();
+          newIngredient.quantity = ingredient.quantity;
+          newIngredient.measuringUnit = ingredient.ingredient.measuringUnit;
+          list.add(newIngredient);
+        }
+        _ingredients = list;
+      }
+    });
+  }
+
   Future<void> addRecipe(Recipe recipe) async {
-    await RecipesRepository.save(recipe);
+    if (_id != 0) {
+      await RecipesRepository.save(recipe);
+    } else {
+      await RecipesRepository.save(recipe);
+    }
   }
 
   Set<Recipe> getStubbedRecipes() {
@@ -49,10 +91,16 @@ class _AddRecipe extends State<AddRecipe> {
 
   @override
   Widget build(BuildContext context) {
+    String bottomButtonTitle;
+    if (_id == 0) {
+      bottomButtonTitle = 'Add';
+    } else {
+      bottomButtonTitle = 'Update';
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: secondary,
-        title: const Text('Add Recipe'),
+        title: Text('$bottomButtonTitle Recipe'),
         actions: [
           Visibility(
             visible: _stubVisibility,
@@ -88,10 +136,14 @@ class _AddRecipe extends State<AddRecipe> {
                       controller: _recipeNameController,
                       keyboardType: TextInputType.name,
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                       decoration: const InputDecoration(
-                        hintText: 'Recipe name',
+                        labelText: 'Name',
+                        labelStyle: TextStyle(
+                          color: primary,
+                        ),
                         border: InputBorder.none,
                       ),
                       validator: (value) {
@@ -107,6 +159,11 @@ class _AddRecipe extends State<AddRecipe> {
                     SampleSizeSelector(
                       samples: sampleSizes,
                       defaultSample: _sampleSize,
+                      onChanged: (changed) {
+                        setState(() {
+                          _sampleSize = changed;
+                        });
+                      },
                     ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 15),
@@ -145,21 +202,30 @@ class _AddRecipe extends State<AddRecipe> {
                             },
                             fieldViewBuilder: (context, textEditingController,
                                 focusNode, onFieldSubmitted) {
-                              _ingredients[index].nameController =
-                                  textEditingController;
+                              if (_ingredients[index]
+                                  .nameController
+                                  .text
+                                  .isEmpty) {
+                                _ingredients[index].nameController =
+                                    textEditingController;
+                              }
                               return SizedBox(
                                 width: MediaQuery.sizeOf(context).width,
                                 child: TextField(
                                   focusNode: focusNode,
-                                  controller: textEditingController,
+                                  controller:
+                                      _ingredients[index].nameController,
                                   onEditingComplete: () {
                                     _ingredients[index].name =
-                                        textEditingController.text;
+                                        _ingredients[index].nameController.text;
                                     onFieldSubmitted();
                                   },
                                   decoration: InputDecoration(
                                       border: InputBorder.none,
-                                      hintText: 'Ingredient name',
+                                      labelText: 'Ingredient',
+                                      labelStyle: const TextStyle(
+                                        color: primary,
+                                      ),
                                       suffix: SizedBox(
                                         width: 150,
                                         child: Row(
@@ -242,7 +308,6 @@ class _AddRecipe extends State<AddRecipe> {
 
                                                       if (_ingredients.length ==
                                                               1 &&
-                                                          parsed != null &&
                                                           addButtonVisibility ==
                                                               false) {
                                                         addButtonVisibility =
@@ -264,7 +329,7 @@ class _AddRecipe extends State<AddRecipe> {
                                               ),
                                             ),
                                             IconButton(
-                                              color: Colors.blue,
+                                              color: primary,
                                               icon: const Icon(Icons.remove),
                                               onPressed: () {
                                                 setState(() {
@@ -348,7 +413,7 @@ class _AddRecipe extends State<AddRecipe> {
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: BottomButton(
-                title: 'Add',
+                title: bottomButtonTitle,
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     addRecipe(

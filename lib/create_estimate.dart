@@ -17,7 +17,7 @@ class CreateEstimation extends StatefulWidget {
 
 class _CreateEstimation extends State<CreateEstimation> {
   final _recipeNameController = TextEditingController();
-  final int _sampleSize = sampleSizes.elementAt(0);
+  int _sampleSize = sampleSizes.elementAt(0);
   late List<Recipe> _storedRecipes;
   final List<RecipeForEstimation> _recipes = List<RecipeForEstimation>.generate(
       1, (index) => RecipeForEstimation(index));
@@ -99,7 +99,14 @@ class _CreateEstimation extends State<CreateEstimation> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: SampleSizeSelector(
-                    samples: sampleSizes, defaultSample: _sampleSize),
+                  samples: sampleSizes,
+                  defaultSample: _sampleSize,
+                  onChanged: (changed) {
+                    setState(() {
+                      _sampleSize = changed;
+                    });
+                  },
+                ),
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 15),

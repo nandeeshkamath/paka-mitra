@@ -45,6 +45,19 @@ class _ViewIngredients extends State<ViewIngredients> {
             ),
           ).then((value) => refresh());
         },
+        onItemTap: (itemRaw) {
+          final item = itemRaw as Ingredient;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddIngredient(
+                  name: item.name,
+                  description: item.description,
+                  id: item.id,
+                  unit: item.measuringUnit),
+            ),
+          );
+        },
         onSearchTap: () {
           _ingredients.then(
             (value) => showSearch(

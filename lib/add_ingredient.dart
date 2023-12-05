@@ -5,7 +5,12 @@ import 'package:wing_cook/model/bottom_button.dart';
 import 'package:wing_cook/model/ingredient.dart';
 
 class AddIngredient extends StatefulWidget {
-  const AddIngredient({super.key});
+  const AddIngredient(
+      {super.key, this.name, this.description, this.unit, this.id});
+  final String? name;
+  final MeasuringUnit? unit;
+  final String? description;
+  final int? id;
 
   @override
   State<StatefulWidget> createState() {
@@ -18,17 +23,45 @@ class _AddIngredient extends State<AddIngredient> {
   final _nameConstroller = TextEditingController();
   final _descriptionController = TextEditingController();
   MeasuringUnit _measuringUnit = MeasuringUnit.kilogram;
+  int _id = 0;
 
   Future<void> addIngredient(Ingredient ingredient) async {
-    await IngredientsRepository.saveIngredient(ingredient);
+    if (_id != 0) {
+      await IngredientsRepository.updateIngredient(ingredient);
+    } else {
+      await IngredientsRepository.saveIngredient(ingredient);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.name != null) {
+      _nameConstroller.text = widget.name!;
+    }
+    if (widget.description != null) {
+      _descriptionController.text = widget.description!;
+    }
+    if (widget.unit != null) {
+      _measuringUnit = widget.unit!;
+    }
+    if (widget.id != null) {
+      _id = widget.id!;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    String bottomButtonTitle;
+    if (_id == 0) {
+      bottomButtonTitle = 'Add';
+    } else {
+      bottomButtonTitle = 'Update';
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: secondary,
-        title: const Text('Add Ingredient'),
+        title: Text('$bottomButtonTitle Ingredient'),
       ),
       body: Stack(
         children: [
@@ -47,10 +80,14 @@ class _AddIngredient extends State<AddIngredient> {
                       controller: _nameConstroller,
                       keyboardType: TextInputType.name,
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Ingredient name',
+                        labelText: 'Name',
+                        labelStyle: const TextStyle(
+                          color: primary,
+                        ),
                         border: InputBorder.none,
                         suffix: SizedBox(
                           width: 40,
@@ -98,13 +135,18 @@ class _AddIngredient extends State<AddIngredient> {
                         return null;
                       },
                     ),
-                    Padding(
+                    Container(
+                      height: MediaQuery.sizeOf(context).height * 0.4,
                       padding: const EdgeInsets.only(top: 20),
                       child: TextFormField(
                         controller: _descriptionController,
                         keyboardType: TextInputType.name,
+                        maxLines: null,
                         decoration: const InputDecoration(
-                          hintText: 'Description (Optional)',
+                          labelText: 'Description',
+                          labelStyle: TextStyle(
+                            color: primary,
+                          ),
                           border: InputBorder.none,
                         ),
                       ),
@@ -119,7 +161,7 @@ class _AddIngredient extends State<AddIngredient> {
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: BottomButton(
-                title: 'Add',
+                title: bottomButtonTitle,
                 onPressed: () async {
                   if (!_formKey.currentState!.validate()) {
                     return;
@@ -127,14 +169,15 @@ class _AddIngredient extends State<AddIngredient> {
                   IngredientsRepository.containsIngredient(
                           _nameConstroller.text)
                       .then((isDuplicate) {
-                    if (isDuplicate) {
+                    if (isDuplicate && _id == 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Name already exists')),
                       );
                       return;
                     }
                     addIngredient(
-                      Ingredient(
+                      Ingredient.withID(
+                        _id,
                         _nameConstroller.text,
                         _measuringUnit,
                         _descriptionController.text,

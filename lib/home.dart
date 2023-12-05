@@ -123,7 +123,7 @@ class _HomePageState extends State<HomePage> {
                   'images/paaka_home.jpg',
                   // height: 400,
                   // opacity: const AlwaysStoppedAnimation(.9),
-                  fit: BoxFit.contain,
+                  fit: BoxFit.fill,
                 ),
               ),
               titlePadding: const EdgeInsets.only(

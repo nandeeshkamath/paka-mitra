@@ -10,6 +10,7 @@ class IngredientForRecipe {
   double? quantity;
 
   IngredientForRecipe(this.index);
+  // IngredientForRecipe()
 }
 
 enum MeasuringUnit {
