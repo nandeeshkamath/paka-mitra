@@ -15,28 +15,47 @@ class ViewIngredients extends StatefulWidget {
 }
 
 class _ViewIngredients extends State<ViewIngredients> {
-  late Future<List<Ingredient>> _ingredients;
+  late Future<List<Ingredient>> _ingredients = Future(() => []);
 
   @override
   void initState() {
+    refresh();
     super.initState();
-    _ingredients = getIngredients();
   }
 
   Future<List<Ingredient>> getIngredients() async {
     return IngredientsRepository.getIngredients();
   }
 
-  refresh() {
+  refresh() async {
+    final list = await getIngredients();
+    list.sort(
+      sortFunctions().values.elementAt(0),
+    );
     setState(() {
-      _ingredients = getIngredients();
+      _ingredients = Future(() => list);
     });
+  }
+
+  Map<String, int Function(Ingredient, Ingredient)> sortFunctions() {
+    return {
+      'Title - Asc': (Ingredient a, Ingredient b) => a.name.compareTo(b.name),
+      'Title - Desc': (Ingredient a, Ingredient b) => b.name.compareTo(a.name),
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     return ViewScrollView(
         title: 'Ingredients',
+        sortFunctions: sortFunctions().keys.toList(),
+        onSort: (selected) async {
+          final list = await _ingredients;
+          list.sort(sortFunctions()[selected]);
+          setState(() {
+            _ingredients = Future(() => list);
+          });
+        },
         onAddPressed: () {
           Navigator.push(
             context,

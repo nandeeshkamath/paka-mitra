@@ -45,7 +45,7 @@ class _ViewListState extends State<ViewList> {
               } else {
                 final data = snapshot.data ?? [];
                 return MasonryGridView.count(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   crossAxisCount: 2,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,

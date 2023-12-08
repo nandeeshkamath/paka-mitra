@@ -4,17 +4,19 @@ import 'package:wing_cook/fragments/search_box.dart';
 import 'package:wing_cook/fragments/view_list.dart';
 
 class ViewScrollView extends StatelessWidget {
-  const ViewScrollView(
-      {Key? key,
-      required this.title,
-      required this.onAddPressed,
-      required this.onSearchTap,
-      required this.onItemTap,
-      required this.items,
-      required this.getTitle,
-      required this.getDescription,
-      required this.getId})
-      : super(key: key);
+  const ViewScrollView({
+    Key? key,
+    required this.title,
+    required this.onAddPressed,
+    required this.onSearchTap,
+    required this.onItemTap,
+    required this.items,
+    required this.getTitle,
+    required this.getDescription,
+    required this.getId,
+    required this.sortFunctions,
+    required this.onSort,
+  }) : super(key: key);
   final String title;
   final Future<List> items;
 
@@ -24,6 +26,8 @@ class ViewScrollView extends StatelessWidget {
   final String Function(dynamic item) getTitle;
   final String? Function(dynamic item) getDescription;
   final int Function(dynamic item) getId;
+  final List<String> sortFunctions;
+  final Function(String selected) onSort;
 
   @override
   Widget build(BuildContext context) {
@@ -70,20 +74,74 @@ class ViewScrollView extends StatelessWidget {
             delegate: SliverChildListDelegate(
               [
                 Container(
-                  color: background,
-                  child: ViewList(
-                    items: items,
-                    physics: physics,
-                    getId: getId,
-                    getTitle: getTitle,
-                    getDescription: getDescription,
-                    onTap: onItemTap,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  height: 50,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      listAction('Sort', Icons.sort, sortFunctions, onSort),
+                      listAction('Filter', Icons.filter_list, [], onSort),
+                    ],
                   ),
+                ),
+                ViewList(
+                  items: items,
+                  physics: physics,
+                  getId: getId,
+                  getTitle: getTitle,
+                  getDescription: getDescription,
+                  onTap: onItemTap,
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget listAction(String title, IconData icon, List<String> items,
+      Function(String) onSort) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton(
+          items: items
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(e),
+                ),
+              )
+              .toList(),
+          isDense: true,
+          style: const TextStyle(color: primary),
+          borderRadius: BorderRadius.circular(10),
+          underline: null,
+          onChanged: (value) => onSort(value!),
+          icon: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: tertiary,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 3,
+                ),
+                child: Icon(
+                  icon,
+                  color: tertiary,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

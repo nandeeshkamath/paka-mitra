@@ -15,7 +15,7 @@ class ViewRecipes extends StatefulWidget {
 }
 
 class _ViewRecipes extends State<ViewRecipes> {
-  late Future<List<Recipe>> _recipes;
+  late Future<List<Recipe>> _recipes = Future(() => []);
 
   @override
   void initState() {
@@ -27,16 +27,35 @@ class _ViewRecipes extends State<ViewRecipes> {
     return RecipesRepository.getAll();
   }
 
-  refresh() {
+  refresh() async {
+    final list = await getRecipes();
+    list.sort(
+      sortFunctions().values.elementAt(0),
+    );
     setState(() {
-      _recipes = getRecipes();
+      _recipes = Future(() => list);
     });
+  }
+
+  Map<String, int Function(Recipe, Recipe)> sortFunctions() {
+    return {
+      'Title - Asc': (Recipe a, Recipe b) => a.name.compareTo(b.name),
+      'Title - Desc': (Recipe a, Recipe b) => b.name.compareTo(a.name),
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     return ViewScrollView(
       title: 'Recipes',
+      sortFunctions: sortFunctions().keys.toList(),
+      onSort: (selected) async {
+        final list = await _recipes;
+        list.sort(sortFunctions()[selected]);
+        setState(() {
+          _recipes = Future(() => list);
+        });
+      },
       onAddPressed: () {
         Navigator.push(
           context,
