@@ -5,11 +5,13 @@ class Recipe {
   int id = 0;
   String name;
   int sampleSize;
+  bool favourite = false;
   Set<QuantifiedIngredient> ingredients;
 
   Recipe(this.name, this.sampleSize, this.ingredients);
 
-  Recipe.withID(this.id, this.name, this.sampleSize, this.ingredients);
+  Recipe.withID(
+      this.id, this.name, this.sampleSize, this.ingredients, this.favourite);
 }
 
 class QuantifiedIngredient {
@@ -51,7 +53,8 @@ Set<QuantifiedIngredient> toQuantifiedIngredients(
     List<IngredientForRecipe> ingredientsForRecipe) {
   return ingredientsForRecipe
       .map((e) => QuantifiedIngredient(
-          Ingredient.withID(e.id, e.nameController.text, e.measuringUnit, null),
+          Ingredient.withID(e.id, e.nameController.text, e.measuringUnit,
+              e.quantityController.text, e.favourite),
           double.parse(e.quantityController.text)))
       .toSet();
 }

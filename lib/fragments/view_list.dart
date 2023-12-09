@@ -27,6 +27,8 @@ class ViewList extends StatefulWidget {
 }
 
 class _ViewListState extends State<ViewList> {
+  Map<int, bool> selectedItems = {};
+  bool isSelectMode = false;
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List>(
@@ -45,6 +47,7 @@ class _ViewListState extends State<ViewList> {
               } else {
                 final data = snapshot.data ?? [];
                 return MasonryGridView.count(
+                  physics: widget.physics,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   crossAxisCount: 2,
                   mainAxisSpacing: 10,
@@ -53,17 +56,39 @@ class _ViewListState extends State<ViewList> {
                   itemCount: data.length,
                   itemBuilder: (context, index) {
                     final item = data[index];
+                    bool isSelected = selectedItems[index] ?? false;
+                    Color borderColor = isSelected ? Colors.blue : tertiary;
                     return Padding(
                       padding: const EdgeInsets.all(5),
                       child: GestureDetector(
+                        onLongPress: () {
+                          setState(() {
+                            if (isSelectMode == false) {
+                              isSelectMode = true;
+                              selectedItems[index] = true;
+                            }
+                          });
+                        },
                         onTap: () {
-                          widget.onTap(item);
+                          if (isSelectMode) {
+                            setState(() {
+                              selectedItems[index] = !isSelected;
+                              if (isSelectMode &&
+                                  selectedItems.values
+                                      .where((element) => element == true)
+                                      .isEmpty) {
+                                isSelectMode = false;
+                              }
+                            });
+                          } else {
+                            widget.onTap(item);
+                          }
                         },
                         child: Material(
                           elevation: 5,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: const BorderSide(color: tertiary, width: 1.5),
+                            side: BorderSide(color: borderColor, width: 1.5),
                           ),
                           child: Stack(
                             children: [

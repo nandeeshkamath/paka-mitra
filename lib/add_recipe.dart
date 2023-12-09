@@ -33,6 +33,7 @@ class _AddRecipe extends State<AddRecipe> {
   bool addButtonVisibility = false;
   final _formKey = GlobalKey<FormState>();
   bool _stubVisibility = false;
+  bool _favourite = false;
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _AddRecipe extends State<AddRecipe> {
               ingredient.quantity.toString();
           newIngredient.quantity = ingredient.quantity;
           newIngredient.measuringUnit = ingredient.ingredient.measuringUnit;
+          newIngredient.favourite = ingredient.ingredient.favourite;
           list.add(newIngredient);
         }
         _ingredients = list;
@@ -412,21 +414,56 @@ class _AddRecipe extends State<AddRecipe> {
             alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: BottomButton(
-                title: bottomButtonTitle,
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    addRecipe(
-                      Recipe(
-                        _recipeNameController.text,
-                        _sampleSize,
-                        toQuantifiedIngredients(_ingredients),
+              child: Row(
+                children: [
+                  Visibility(
+                    visible: _id != 0,
+                    child: Container(
+                      // elevation: 6,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: tertiary),
                       ),
-                    );
-                  }
+                      child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _favourite = !_favourite;
+                          });
+                        },
+                        style: const ButtonStyle(
+                          fixedSize: MaterialStatePropertyAll(Size(60, 60)),
+                          splashFactory: NoSplash.splashFactory,
+                        ),
+                        icon: Icon(
+                          _favourite ? Icons.favorite : Icons.favorite_border,
+                          color: secondary,
+                          size: 35,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  BottomButton(
+                    title: bottomButtonTitle,
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        addRecipe(
+                          Recipe.withID(
+                            _id,
+                            _recipeNameController.text,
+                            _sampleSize,
+                            toQuantifiedIngredients(_ingredients),
+                            _favourite,
+                          ),
+                        );
+                      }
 
-                  Navigator.pop(context);
-                },
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
               ),
             ),
           ),

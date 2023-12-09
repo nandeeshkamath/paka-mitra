@@ -10,12 +10,13 @@ class IngredientsRepository {
     final data = {
       'name': ingredient.name,
       'measuringUnit': ingredient.measuringUnit.value,
-      'description': ingredient.description
+      'description': ingredient.description,
+      'favourite': ingredient.favourite ? 1 : 0,
     };
     final id = await db.insert('ingredients', data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
-    return Ingredient.withID(
-        id, ingredient.name, ingredient.measuringUnit, ingredient.description);
+    return Ingredient.withID(id, ingredient.name, ingredient.measuringUnit,
+        ingredient.description, ingredient.favourite);
   }
 
   static Future<List<Ingredient>> getIngredients() async {
@@ -46,6 +47,7 @@ class IngredientsRepository {
       'name': ingredient.name,
       'measuringUnit': ingredient.measuringUnit.value,
       'description': ingredient.description,
+      'favourite': ingredient.favourite ? 1 : 0,
       'updatedAt': DateTime.now().toString()
     };
 
@@ -78,6 +80,7 @@ class IngredientsRepository {
       map['name'],
       toMeasuringUnit(map['measuringUnit']),
       map['description'],
+      map['favourite'] == 1,
     );
   }
 }

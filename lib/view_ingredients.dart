@@ -16,6 +16,10 @@ class ViewIngredients extends StatefulWidget {
 
 class _ViewIngredients extends State<ViewIngredients> {
   late Future<List<Ingredient>> _ingredients = Future(() => []);
+  late int Function(Ingredient, Ingredient) selectedSort =
+      sortFunctions().values.elementAt(0);
+  late bool Function(Ingredient) selectedFilter =
+      filterFunctions().values.elementAt(0);
 
   @override
   void initState() {
@@ -29,9 +33,7 @@ class _ViewIngredients extends State<ViewIngredients> {
 
   refresh() async {
     final list = await getIngredients();
-    list.sort(
-      sortFunctions().values.elementAt(0),
-    );
+    list.sort(selectedSort);
     setState(() {
       _ingredients = Future(() => list);
     });
@@ -41,56 +43,80 @@ class _ViewIngredients extends State<ViewIngredients> {
     return {
       'Title - Asc': (Ingredient a, Ingredient b) => a.name.compareTo(b.name),
       'Title - Desc': (Ingredient a, Ingredient b) => b.name.compareTo(a.name),
+      'Favourite': (Ingredient a, Ingredient b) => b.favourite ? 1 : -1,
+    };
+  }
+
+  Map<String, bool Function(Ingredient)> filterFunctions() {
+    return {
+      'All': (Ingredient a) => a.id > 0,
+      'Favourite': (Ingredient a) => a.favourite,
     };
   }
 
   @override
   Widget build(BuildContext context) {
     return ViewScrollView(
-        title: 'Ingredients',
-        sortFunctions: sortFunctions().keys.toList(),
-        onSort: (selected) async {
-          final list = await _ingredients;
-          list.sort(sortFunctions()[selected]);
-          setState(() {
-            _ingredients = Future(() => list);
-          });
-        },
-        onAddPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddIngredient(),
+      title: 'Ingredients',
+      sortFunctions: sortFunctions().keys.toList(),
+      onSort: (selected) async {
+        final list = await _ingredients;
+        setState(() {
+          selectedSort = sortFunctions()[selected]!;
+        });
+        list.sort(selectedSort);
+        setState(() {
+          _ingredients = Future(() => list);
+        });
+      },
+      filterFunctions: filterFunctions().keys.toList(),
+      onFilter: (selected) async {
+        final list = await getIngredients();
+        setState(() {
+          selectedFilter = filterFunctions()[selected]!;
+          _ingredients = Future(() => list.where(selectedFilter).toList());
+        });
+      },
+      onAddPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AddIngredient(),
+          ),
+        ).then((value) => refresh());
+      },
+      onItemTap: (itemRaw) {
+        final item = itemRaw as Ingredient;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddIngredient(
+              name: item.name,
+              description: item.description,
+              id: item.id,
+              unit: item.measuringUnit,
+              favourite: item.favourite,
             ),
-          ).then((value) => refresh());
-        },
-        onItemTap: (itemRaw) {
-          final item = itemRaw as Ingredient;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddIngredient(
-                  name: item.name,
-                  description: item.description,
-                  id: item.id,
-                  unit: item.measuringUnit),
+            maintainState: false,
+          ),
+        ).then((value) => refresh());
+      },
+      onSearchTap: () {
+        _ingredients.then(
+          (value) => showSearch(
+            context: context,
+            delegate: ItemSearchDelegate(
+              map: {"Ingredients": value.map((e) => e.name).toList()},
             ),
-          );
-        },
-        onSearchTap: () {
-          _ingredients.then(
-            (value) => showSearch(
-              context: context,
-              delegate: ItemSearchDelegate(
-                map: {"Ingredients": value.map((e) => e.name).toList()},
-              ),
-            ),
-          );
-        },
-        items: _ingredients,
-        getId: (item) => (item as Ingredient).id,
-        getTitle: (item) => (item as Ingredient).name,
-        getDescription: (item) => (item as Ingredient).description);
+          ),
+        );
+      },
+      items: _ingredients,
+      getId: (item) => (item as Ingredient).id,
+      getTitle: (item) => (item as Ingredient).name,
+      getDescription: (item) => (item as Ingredient).description,
+      getFavourite: (item) => (item as Ingredient).favourite,
+    );
   }
 }
 

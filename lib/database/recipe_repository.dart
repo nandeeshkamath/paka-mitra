@@ -21,11 +21,12 @@ class RecipesRepository {
     final data = {
       'name': recipe.name,
       'sampleSize': recipe.sampleSize.toString(),
+      'favourite': recipe.favourite ? 1 : false,
     };
     final id = await db.insert('recipes', data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
-    Recipe inserted =
-        Recipe.withID(id, recipe.name, recipe.sampleSize, recipe.ingredients);
+    Recipe inserted = Recipe.withID(id, recipe.name, recipe.sampleSize,
+        recipe.ingredients, recipe.favourite);
 
     for (var q in recipe.ingredients) {
       RecipeIngredientMap recIngMap =
@@ -83,22 +84,6 @@ class RecipesRepository {
     return recipeList;
   }
 
-  static Future<int> updateIngredient(int id, String title,
-      MeasuringUnit measuringUnit, String? description) async {
-    final db = await DatabaseHelper.db();
-
-    final data = {
-      'title': title,
-      'measuringUnit': measuringUnit,
-      'description': description,
-      'updatedAt': DateTime.now().toString()
-    };
-
-    final result =
-        await db.update('ingredients', data, where: "id = ?", whereArgs: [id]);
-    return result;
-  }
-
   static Future<void> delete(int id) async {
     final db = await DatabaseHelper.db();
     try {
@@ -124,11 +109,13 @@ class RecipesRepository {
     int id = recipe['id'];
     String name = recipe['name'];
     int sampleSize = recipe['sampleSize'];
+    bool favourite = recipe['favourite'] == 1;
     return Recipe.withID(
       id,
       name,
       sampleSize,
       quantifiedIngredients,
+      favourite,
     );
   }
 }

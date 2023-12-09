@@ -16,6 +16,10 @@ class ViewRecipes extends StatefulWidget {
 
 class _ViewRecipes extends State<ViewRecipes> {
   late Future<List<Recipe>> _recipes = Future(() => []);
+  late int Function(Recipe, Recipe) selectedSort =
+      sortFunctions().values.elementAt(0);
+  late bool Function(Recipe) selectedFilter =
+      filterFunctions().values.elementAt(0);
 
   @override
   void initState() {
@@ -41,6 +45,14 @@ class _ViewRecipes extends State<ViewRecipes> {
     return {
       'Title - Asc': (Recipe a, Recipe b) => a.name.compareTo(b.name),
       'Title - Desc': (Recipe a, Recipe b) => b.name.compareTo(a.name),
+      'Favourite': (Recipe a, Recipe b) => b.favourite ? 1 : -1,
+    };
+  }
+
+  Map<String, bool Function(Recipe)> filterFunctions() {
+    return {
+      'All': (Recipe a) => a.id > 0,
+      'Favourite': (Recipe a) => a.favourite,
     };
   }
 
@@ -51,9 +63,20 @@ class _ViewRecipes extends State<ViewRecipes> {
       sortFunctions: sortFunctions().keys.toList(),
       onSort: (selected) async {
         final list = await _recipes;
-        list.sort(sortFunctions()[selected]);
+        setState(() {
+          selectedSort = sortFunctions()[selected]!;
+        });
+        list.sort(selectedSort);
         setState(() {
           _recipes = Future(() => list);
+        });
+      },
+      filterFunctions: filterFunctions().keys.toList(),
+      onFilter: (selected) async {
+        final list = await getRecipes();
+        setState(() {
+          selectedFilter = filterFunctions()[selected]!;
+          _recipes = Future(() => list.where(selectedFilter).toList());
         });
       },
       onAddPressed: () {
@@ -76,7 +99,7 @@ class _ViewRecipes extends State<ViewRecipes> {
               ingredients: item.ingredients,
             ),
           ),
-        );
+        ).then((value) => refresh());
       },
       onSearchTap: () {
         _recipes.then((value) => showSearch(
@@ -91,6 +114,7 @@ class _ViewRecipes extends State<ViewRecipes> {
         final recipe = (item as Recipe);
         return recipe.ingredients.map((e) => e.ingredient.name).join(", ");
       },
+      getFavourite: (item) => (item as Recipe).favourite,
     );
   }
 }

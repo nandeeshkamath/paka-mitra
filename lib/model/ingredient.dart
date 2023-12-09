@@ -8,9 +8,9 @@ class IngredientForRecipe {
   MeasuringUnit measuringUnit = MeasuringUnit.kilogram;
   String? name;
   double? quantity;
+  bool favourite = false;
 
   IngredientForRecipe(this.index);
-  // IngredientForRecipe()
 }
 
 enum MeasuringUnit {
@@ -33,13 +33,15 @@ class Ingredient {
   String name;
   MeasuringUnit measuringUnit;
   String? description;
+  bool favourite = false;
 
   Ingredient(this.name, this.measuringUnit, this.description);
 
-  Ingredient.withID(this.id, this.name, this.measuringUnit, this.description);
+  Ingredient.withID(
+      this.id, this.name, this.measuringUnit, this.description, this.favourite);
 
   @override
   toString() {
-    return "id: $id, name: $name, unit: $measuringUnit, description: $description";
+    return "id: $id, name: $name, unit: $measuringUnit, description: $description, favourite: $favourite";
   }
 }

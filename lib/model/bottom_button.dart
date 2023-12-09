@@ -9,12 +9,13 @@ class BottomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return Expanded(
+        child: ElevatedButton(
       onPressed: onPressed,
       style: ButtonStyle(
           elevation: const MaterialStatePropertyAll(10),
-          fixedSize: MaterialStatePropertyAll(
-            Size(MediaQuery.sizeOf(context).width, 60),
+          fixedSize: const MaterialStatePropertyAll(
+            Size.fromHeight(60),
           ),
           backgroundColor: const MaterialStatePropertyAll(secondary),
           overlayColor: const MaterialStatePropertyAll(primary),
@@ -29,6 +30,6 @@ class BottomButton extends StatelessWidget {
           letterSpacing: 1.1,
         ),
       ),
-    );
+    ));
   }
 }

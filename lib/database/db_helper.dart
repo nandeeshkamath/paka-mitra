@@ -9,6 +9,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         name TEXT NOT NULL,
         sampleSize INTEGER NOT NULL,
+        favourite INTEGER NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
@@ -18,6 +19,7 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         measuringUnit TEXT NOT NULL,
         description TEXT,
+        favourite INTEGER NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
