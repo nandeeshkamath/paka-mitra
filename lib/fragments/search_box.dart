@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wing_cook/constants/app_theme.dart';
 
 class SearchBox extends StatelessWidget {
   const SearchBox({Key? key, required this.onTap}) : super(key: key);
@@ -7,8 +8,11 @@ class SearchBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 20,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+      elevation: 10,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(color: secondary),
+      ),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
