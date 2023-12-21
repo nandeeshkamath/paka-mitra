@@ -1,42 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wing_cook/constants/app_theme.dart';
+import 'package:wing_cook/database/estimation_repository.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
 import 'package:wing_cook/fragments/add_additional.dart';
 import 'package:wing_cook/fragments/sample_size_selector.dart';
 import 'package:wing_cook/model/bottom_button.dart';
+import 'package:wing_cook/model/estimation.dart';
 import 'package:wing_cook/model/recipe.dart';
+import 'package:wing_cook/providers/repository_providers.dart';
 
-class CreateEstimation extends StatefulWidget {
-  const CreateEstimation({super.key});
+final recipesForEstimationProvider = StateProvider.autoDispose((ref) =>
+    List<RecipeForEstimation>.generate(
+        1, (index) => RecipeForEstimation(index)));
+final estimationNameController = StateProvider.autoDispose((ref) => '');
+final sampleSizeController =
+    StateProvider.autoDispose((ref) => sampleSizes.elementAt(0));
+final addButtonController = StateProvider.autoDispose((ref) => false);
 
-  @override
-  State<StatefulWidget> createState() {
-    return _CreateEstimation();
-  }
-}
+class CreateEstimation extends ConsumerWidget {
+  CreateEstimation({super.key});
 
-class _CreateEstimation extends State<CreateEstimation> {
-  final _recipeNameController = TextEditingController();
-  int _sampleSize = sampleSizes.elementAt(0);
-  late List<Recipe> _storedRecipes;
-  final List<RecipeForEstimation> _recipes = List<RecipeForEstimation>.generate(
-      1, (index) => RecipeForEstimation(index));
-  bool addButtonVisibility = false;
+  final _estimationNameController = TextEditingController();
+  final List<Recipe> _storedRecipes = [];
+  // final List<RecipeForEstimation> _recipes = List<RecipeForEstimation>.generate(
+  //     1, (index) => RecipeForEstimation(index));
+  // bool addButtonVisibility = false;
   final _formKey = GlobalKey<FormState>();
 
   Future<void> addRecipe(Recipe recipe) async {
     await RecipesRepository.save(recipe);
   }
 
-  int getIngredientCount() {
-    return getIngredientsForRecipe().length;
+  int getIngredientCount(WidgetRef ref) {
+    return getIngredientsForRecipe(ref).length;
   }
 
-  List<QuantifiedIngredient> getIngredientsForRecipe() {
-    if (_recipes.where((element) => element.recipe != null).isEmpty) {
+  List<QuantifiedIngredient> getIngredientsForRecipe(WidgetRef ref) {
+    final selectedRecipes = ref.watch(recipesForEstimationProvider);
+    if (selectedRecipes.where((element) => element.recipe != null).isEmpty) {
       return List.empty();
     }
-    final intermediate = _recipes
+    final intermediate = selectedRecipes
         .where((element) => element.recipe != null)
         .where((e) => e.recipe!.ingredients.isNotEmpty == true)
         .map((e) => e.recipe!.ingredients)
@@ -56,17 +61,30 @@ class _CreateEstimation extends State<CreateEstimation> {
     return merged.values.toList();
   }
 
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-    final list = await RecipesRepository.getAll();
-    setState(() {
-      _storedRecipes = list;
-    });
-  }
+  // @override
+  // void didChangeDependencies() async {
+  //   super.didChangeDependencies();
+  //   final list = await RecipesRepository.getAll();
+  //   setState(() {
+  //     _storedRecipes = list;
+  //   });
+  // }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sampleSize = ref.watch(sampleSizeController);
+    final addButtonVisibility = ref.watch(addButtonController);
+    final recipesEdit = ref.watch(recipesForEstimationProvider);
+    _estimationNameController.text = ref.watch(estimationNameController);
+    ref.watch(recipesProvider).maybeWhen(
+          data: (data) {
+            if (_storedRecipes.isEmpty) {
+              _storedRecipes.addAll(data);
+            }
+          },
+          orElse: () {},
+        );
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: secondary,
@@ -79,7 +97,12 @@ class _CreateEstimation extends State<CreateEstimation> {
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: TextFormField(
-                  controller: _recipeNameController,
+                  controller: _estimationNameController,
+                  onChanged: (value) {
+                    ref
+                        .read(estimationNameController.notifier)
+                        .update((state) => value);
+                  },
                   keyboardType: TextInputType.name,
                   style: const TextStyle(
                     fontSize: 20,
@@ -100,11 +123,11 @@ class _CreateEstimation extends State<CreateEstimation> {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: SampleSizeSelector(
                   samples: sampleSizes,
-                  defaultSample: _sampleSize,
+                  defaultSample: sampleSize,
                   onChanged: (changed) {
-                    setState(() {
-                      _sampleSize = changed;
-                    });
+                    ref
+                        .read(sampleSizeController.notifier)
+                        .update((state) => changed);
                   },
                 ),
               ),
@@ -117,7 +140,7 @@ class _CreateEstimation extends State<CreateEstimation> {
                   scrollDirection: Axis.vertical,
                   padding:
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                  itemCount: _recipes.length,
+                  itemCount: recipesEdit.length,
                   shrinkWrap: true,
                   // itemExtent: 50,
                   itemBuilder: (BuildContext ctx, int index) {
@@ -126,7 +149,7 @@ class _CreateEstimation extends State<CreateEstimation> {
                       child: Flex(
                         direction: Axis.horizontal,
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        key: ValueKey(_recipes[index].index),
+                        key: ValueKey(recipesEdit[index].index),
                         children: [
                           Expanded(
                             child: Autocomplete<Recipe>(
@@ -145,22 +168,27 @@ class _CreateEstimation extends State<CreateEstimation> {
                               },
                               onSelected: (Recipe value) {
                                 FocusManager.instance.primaryFocus?.unfocus();
-                                setState(
-                                  () {
-                                    // _recipes[index].name = value.name;
-                                    // _recipes[index].id = value.id;
-                                    _recipes[index].recipe = value;
+                                ref
+                                    .read(recipesForEstimationProvider.notifier)
+                                    .update((state) {
+                                  List<RecipeForEstimation> updating = [
+                                    ...state
+                                  ];
+                                  updating[index].recipe = value;
+                                  state = updating;
+                                  return state;
+                                });
 
-                                    if (_recipes.length == 1 &&
-                                        addButtonVisibility == false) {
-                                      addButtonVisibility = true;
-                                    }
-                                  },
-                                );
+                                if (recipesEdit.length == 1 &&
+                                    addButtonVisibility == false) {
+                                  ref
+                                      .read(addButtonController.notifier)
+                                      .update((state) => true);
+                                }
                               },
                               fieldViewBuilder: (context, textEditingController,
                                   focusNode, onFieldSubmitted) {
-                                _recipes[index].nameController =
+                                recipesEdit[index].nameController =
                                     textEditingController;
 
                                 return TextField(
@@ -168,13 +196,13 @@ class _CreateEstimation extends State<CreateEstimation> {
                                   focusNode: focusNode,
                                   controller: textEditingController,
                                   onSubmitted: (value) {
-                                    if (!_storedRecipes.any(
-                                        (element) => element.name == value)) {
-                                      setState(() {
-                                        _recipes[index].error =
-                                            'Invalid recipe selected.';
-                                      });
-                                    }
+                                    // if (!_storedRecipes.any(
+                                    //     (element) => element.name == value)) {
+                                    //   setState(() {
+                                    //     _recipes[index].error =
+                                    //         'Invalid recipe selected.';
+                                    //   });
+                                    // }
                                     //  else if (_recipes
                                     //     .map((e) => e.recipe?.name)
                                     //     .contains(_recipes[index]
@@ -188,18 +216,18 @@ class _CreateEstimation extends State<CreateEstimation> {
                                   },
                                   onTapOutside: (event) {
                                     String input =
-                                        _recipes[index].nameController.text;
+                                        recipesEdit[index].nameController.text;
                                     if (input.isNotEmpty) {
-                                      if (!_storedRecipes.any((element) =>
-                                          element.name ==
-                                          _recipes[index]
-                                              .nameController
-                                              .text)) {
-                                        setState(() {
-                                          _recipes[index].error =
-                                              'Invalid recipe selected.';
-                                        });
-                                      }
+                                      // if (!_storedRecipes.any((element) =>
+                                      //     element.name ==
+                                      //     _recipes[index]
+                                      //         .nameController
+                                      //         .text)) {
+                                      //   setState(() {
+                                      //     _recipes[index].error =
+                                      //         'Invalid recipe selected.';
+                                      //   });
+                                      // }
                                       //   else if (_recipes
                                       //       .map((e) => e.recipe?.name)
                                       //       .contains(_recipes[index]
@@ -217,19 +245,19 @@ class _CreateEstimation extends State<CreateEstimation> {
                                     //     textEditingController.text;
                                     onFieldSubmitted();
                                   },
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     border: InputBorder.none,
                                     isDense: true,
                                     hintText: 'Recipe name',
-                                    errorText:
-                                        _recipes[index].error?.isNotEmpty ==
-                                                    true &&
-                                                _recipes[index]
-                                                    .nameController
-                                                    .text
-                                                    .isNotEmpty
-                                            ? _recipes[index].error
-                                            : '',
+                                    // errorText:
+                                    //     _recipes[index].error?.isNotEmpty ==
+                                    //                 true &&
+                                    //             _recipes[index]
+                                    //                 .nameController
+                                    //                 .text
+                                    //                 .isNotEmpty
+                                    //         ? _recipes[index].error
+                                    //         : '',
                                   ),
                                 );
                               },
@@ -275,22 +303,20 @@ class _CreateEstimation extends State<CreateEstimation> {
                             ),
                             onPressed: () {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              setState(() {
-                                // [TODO]nk: Clear values instead of delete row when length = 1
-                                if (_recipes.length != 1) {
-                                  _recipes.removeAt(index);
-                                  if (_recipes.length == 1 &&
-                                      addButtonVisibility == true &&
-                                      _recipes[0].recipe == null) {
-                                    addButtonVisibility = false;
-                                  }
-                                } else {
-                                  setState(() {
-                                    _recipes[index].nameController.clear();
-                                    _recipes[index].recipe = null;
-                                  });
+                              // [TODO]nk: Clear values instead of delete row when length = 1
+                              if (recipesEdit.length != 1) {
+                                recipesEdit.removeAt(index);
+                                if (recipesEdit.length == 1 &&
+                                    addButtonVisibility == true &&
+                                    recipesEdit[0].recipe == null) {
+                                  ref
+                                      .read(addButtonController.notifier)
+                                      .update((state) => false);
                                 }
-                              });
+                              } else {
+                                recipesEdit[index].nameController.clear();
+                                recipesEdit[index].recipe = null;
+                              }
                             },
                           ),
                         ],
@@ -300,13 +326,17 @@ class _CreateEstimation extends State<CreateEstimation> {
                 ),
               ),
               Visibility(
-                visible: !_recipes
+                visible: !recipesEdit
                     .any((element) => element.nameController.text.isEmpty),
                 child: AddAdditional(
                   title: 'Add recipe',
                   onPressed: () {
-                    setState(() {
-                      _recipes.add(RecipeForEstimation(_recipes.length - 1));
+                    ref
+                        .read(recipesForEstimationProvider.notifier)
+                        .update((state) {
+                      final updating = [...state];
+                      updating.add(RecipeForEstimation(recipesEdit.length - 1));
+                      return updating;
                     });
                   },
                 ),
@@ -314,11 +344,11 @@ class _CreateEstimation extends State<CreateEstimation> {
             ],
           ),
           Visibility(
-            visible: getIngredientCount() != 0 &&
+            visible: getIngredientCount(ref) != 0 &&
                 MediaQuery.of(context).viewInsets.bottom == 0,
             child: DraggableScrollableSheet(
-              initialChildSize: 0.1,
-              minChildSize: 0.1,
+              initialChildSize: 0.2,
+              minChildSize: 0.2,
               maxChildSize: 0.85,
               builder: (context, scrollController) {
                 return SingleChildScrollView(
@@ -368,9 +398,10 @@ class _CreateEstimation extends State<CreateEstimation> {
                             child: ListView.builder(
                               shrinkWrap: true,
                               padding: const EdgeInsets.symmetric(vertical: 20),
-                              itemCount: getIngredientCount(),
+                              itemCount: getIngredientCount(ref),
                               itemBuilder: (context, index) {
-                                final ingredients = getIngredientsForRecipe();
+                                final ingredients =
+                                    getIngredientsForRecipe(ref);
                                 return SizedBox(
                                   height: 50,
                                   child: ListTile(
@@ -381,7 +412,7 @@ class _CreateEstimation extends State<CreateEstimation> {
                                           fontWeight: FontWeight.w500),
                                     ),
                                     trailing: Text(
-                                      "${ingredients[index].quantity * _sampleSize} ${ingredients[index].ingredient.measuringUnit.abbr}",
+                                      "${ingredients[index].quantity * sampleSize} ${ingredients[index].ingredient.measuringUnit.abbr}",
                                       style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold),
@@ -403,9 +434,21 @@ class _CreateEstimation extends State<CreateEstimation> {
             alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: BottomButton(
-                title: 'Create',
-                onPressed: () {},
+              child: Row(
+                children: [
+                  BottomButton(
+                    title: 'Create',
+                    onPressed: () {
+                      final recipes = recipesEdit
+                          .where((element) => element.recipe != null)
+                          .map((e) => e.recipe!)
+                          .toList();
+                      EstimationRepository.save(Estimation(
+                          _estimationNameController.text, sampleSize, recipes));
+                      Navigator.pop(context);
+                    },
+                  )
+                ],
               ),
             ),
           )

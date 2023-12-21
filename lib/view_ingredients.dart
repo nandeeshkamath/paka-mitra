@@ -81,7 +81,7 @@ class _ViewIngredients extends State<ViewIngredients> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const AddIngredient(),
+            builder: (context) => AddIngredient(),
           ),
         ).then((value) => refresh());
       },
@@ -91,11 +91,7 @@ class _ViewIngredients extends State<ViewIngredients> {
           context,
           MaterialPageRoute(
             builder: (context) => AddIngredient(
-              name: item.name,
-              description: item.description,
-              id: item.id,
-              unit: item.measuringUnit,
-              favourite: item.favourite,
+              existing: item,
             ),
             maintainState: false,
           ),

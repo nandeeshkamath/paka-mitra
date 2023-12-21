@@ -5,6 +5,15 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 class DatabaseHelper {
   static Future<void> createTables(sql.Database database) async {
+    await database.execute("""CREATE TABLE estimates(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        name TEXT NOT NULL,
+        sampleSize INTEGER NOT NULL,
+        favourite INTEGER NOT NULL,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+      """);
     await database.execute("""CREATE TABLE recipes(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         name TEXT NOT NULL,
@@ -29,6 +38,14 @@ class DatabaseHelper {
         recipeId INTEGER NOT NULL,
         ingredientId INTEGER NOT NULL,
         quantity REAL NOT NULL,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+      """);
+    await database.execute("""CREATE TABLE estimate_recipe_map(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        estimationId INTEGER NOT NULL,
+        recipeId INTEGER NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )

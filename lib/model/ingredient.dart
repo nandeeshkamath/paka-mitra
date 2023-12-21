@@ -37,8 +37,29 @@ class Ingredient {
 
   Ingredient(this.name, this.measuringUnit, this.description);
 
+  Ingredient.withOptional(
+      {this.id = 0,
+      this.name = '',
+      this.measuringUnit = MeasuringUnit.kilogram,
+      this.description = '',
+      this.favourite = false});
+
   Ingredient.withID(
       this.id, this.name, this.measuringUnit, this.description, this.favourite);
+
+  Ingredient copyWith(
+      {final int? id,
+      final String? name,
+      final MeasuringUnit? measuringUnit,
+      final String? description,
+      final bool? favourite}) {
+    return Ingredient.withOptional(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        measuringUnit: measuringUnit ?? this.measuringUnit,
+        favourite: favourite ?? this.favourite);
+  }
 
   @override
   toString() {

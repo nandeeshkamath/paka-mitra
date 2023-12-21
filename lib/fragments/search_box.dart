@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wing_cook/constants/app_theme.dart';
 
 class SearchBox extends StatelessWidget {
-  const SearchBox({Key? key, required this.onTap}) : super(key: key);
+  const SearchBox({super.key, required this.onTap});
   final VoidCallback onTap;
 
   @override
@@ -26,7 +26,7 @@ class SearchBox extends StatelessWidget {
           ),
           child: const Text(
             "Search",
-            textScaleFactor: 1.2,
+            textScaler: TextScaler.linear(1.2),
             style: TextStyle(color: Colors.black54),
           ),
         ),

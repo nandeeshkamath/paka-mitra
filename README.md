@@ -23,8 +23,21 @@ samples, guidance on mobile development, and a full API reference.
 - Auto suggest ingredient names while adding recipe - Done
 - Add screen to view, edit, delete ingredients - Done
 - Add screen to view, edit, delete recipes - Done
+- Add ability to search ingredients, recipe - Done
+- Persist estimate
+- View estimates screen
+- Show recent 3 estimates in home screen
+- Normalize ingredient quantity while adding recipe
+- Clickable search chips
 - Auto suggest ingredient in add recipe screen
-- Add ability to search ingredients, recipe
+- Auto suggest recipe in create estimate screen
+- Fix duplicate recipe inserted in favourite
+- Improve icons and logos
+- Add splash screen
+- Add animations
+- Share estimate as screenshot or image
+- Add import or export database option
+
 
 ## Bugs
 

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wing_cook/constants/app_theme.dart';
 
 class AddAdditional extends StatelessWidget {
-  const AddAdditional({Key? key, required this.title, required this.onPressed})
-      : super(key: key);
+  const AddAdditional({super.key, required this.title, required this.onPressed});
   final VoidCallback onPressed;
   final String title;
 

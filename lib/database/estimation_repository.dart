@@ -1,123 +1,119 @@
-// import 'package:flutter/foundation.dart';
-// import 'package:sqflite/sqflite.dart' as sql;
-// import 'package:wing_cook/database/db_helper.dart';
-// import 'package:wing_cook/database/ingredients_repository.dart';
-// import 'package:wing_cook/database/recipe_ingredients_map_repository.dart';
-// import 'package:wing_cook/model/estimation.dart';
-// import 'package:wing_cook/model/ingredient.dart';
-// import 'package:wing_cook/model/recipe.dart';
+import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sqflite/sqflite.dart' as sql;
+import 'package:wing_cook/database/db_helper.dart';
+import 'package:wing_cook/database/estimates_recipe_map_repository.dart';
+import 'package:wing_cook/database/recipe_repository.dart';
+import 'package:wing_cook/model/estimation.dart';
+import 'package:wing_cook/model/recipe.dart';
 
-// class EstimationRepository {
-//   static Future<Recipe> save(Estimation recipe) async {
-//     final db = await DatabaseHelper.db();
+final estimationRepositoryProvider = Provider((ref) => EstimationRepository());
 
-//     for (var quantifiedIngredient in recipe.ingredients) {
-//       if (quantifiedIngredient.ingredient.id == 0) {
-//         quantifiedIngredient.ingredient =
-//             await IngredientsRepository.saveIngredient(
-//                 quantifiedIngredient.ingredient);
-//       }
-//     }
+class EstimationRepository {
+  static Future<Estimation> save(Estimation estimation) async {
+    final db = await DatabaseHelper.db();
 
-//     final data = {
-//       'name': recipe.name,
-//       'sampleSize': recipe.sampleSize.toString(),
-//     };
-//     final id = await db.insert('recipes', data,
-//         conflictAlgorithm: sql.ConflictAlgorithm.replace);
-//     Recipe inserted =
-//         Recipe.withID(id, recipe.name, recipe.sampleSize, recipe.ingredients);
+    final data = {
+      'name': estimation.name,
+      'sampleSize': estimation.sampleSize.toString(),
+      'favourite': estimation.favourite ? 1 : 0,
+    };
+    final id = await db.insert('estimates', data,
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    Estimation inserted = Estimation.withID(id, estimation.name,
+        estimation.sampleSize, estimation.favourite, estimation.recipes, null);
 
-//     for (var q in recipe.ingredients) {
-//       RecipeIngredientMap recIngMap =
-//           RecipeIngredientMap(inserted.id, q.ingredient.id, q.quantity);
-//       RecipeIngredientsMapRepository.save(recIngMap);
-//     }
-//     return inserted;
-//   }
+    for (var q in estimation.recipes) {
+      EstimationRecipeMap estRecMap = EstimationRecipeMap(inserted.id, q.id);
+      EstimateRecipeRepository.save(estRecMap);
+    }
+    return inserted;
+  }
 
-//   static Future<List<Recipe>> getAll() async {
-//     final db = await DatabaseHelper.db();
-//     List<Map<String, dynamic>> recipes =
-//         await db.query('recipes', orderBy: "id");
-//     return _getListOfRecipe(recipes);
-//   }
+  static Future<List<Estimation>> getAll() async {
+    final db = await DatabaseHelper.db();
+    List<Map<String, dynamic>> estimates =
+        await db.query('estimates', orderBy: "id");
+    return _getListOfEstimation(estimates);
+  }
 
-//   static Future<List<Recipe>> get(int id) async {
-//     final db = await DatabaseHelper.db();
-//     List<Map<String, dynamic>> recipes =
-//         await db.query('recipes', where: "id = ?", whereArgs: [id], limit: 1);
-//     return _getListOfRecipe(recipes);
-//   }
+  Future<List<Estimation>> getAll2() async {
+    final db = await DatabaseHelper.db();
+    List<Map<String, dynamic>> estimates =
+        await db.query('estimates', orderBy: "id");
+    return _getListOfEstimation(estimates);
+  }
 
-//   static Future<List<Recipe>> _getListOfRecipe(
-//       List<Map<String, dynamic>> recipes) async {
-//     List<Recipe> recipeList = List.empty(growable: true);
-//     for (var recipe in recipes) {
-//       List<RecipeIngredientMap> recIngMaps =
-//           await RecipeIngredientsMapRepository.getIngredientsIdForRecipeId(
-//               recipe['id']);
+  static Future<List<Estimation>> get(int id) async {
+    final db = await DatabaseHelper.db();
+    List<Map<String, dynamic>> estimates =
+        await db.query('estimes', where: "id = ?", whereArgs: [id], limit: 1);
+    return _getListOfEstimation(estimates);
+  }
 
-//       List<QuantifiedIngredient> quantifiedIngredients =
-//           List.empty(growable: true);
-//       for (var recIngMap in recIngMaps) {
-//         List<Ingredient> ingredients =
-//             await IngredientsRepository.getIngredient(recIngMap.ingredientId);
-//         quantifiedIngredients
-//             .add(QuantifiedIngredient(ingredients[0], recIngMap.quantity));
-//       }
+  static Future<List<Estimation>> _getListOfEstimation(
+      List<Map<String, dynamic>> estimates) async {
+    List<Estimation> estimationList = List.empty(growable: true);
+    for (var estimate in estimates) {
+      List<EstimationRecipeMap> recIngMaps =
+          await EstimateRecipeRepository.getRecipesForEstimationId(
+              estimate['id']);
 
-//       recipeList.add(toRecipe(recipe, quantifiedIngredients.toSet()));
-//     }
-//     return recipeList;
-//   }
+      List<Recipe> recipes = List.empty(growable: true);
+      for (var recIngMap in recIngMaps) {
+        List<Recipe> rec = await RecipesRepository.get(recIngMap.recipeId);
+        recipes.addAll(rec);
+      }
 
-//   static Future<int> updateIngredient(int id, String title,
-//       MeasuringUnit measuringUnit, String? description) async {
-//     final db = await DatabaseHelper.db();
+      estimationList.add(toEstimation(estimate, recipes));
+    }
+    return estimationList;
+  }
 
-//     final data = {
-//       'title': title,
-//       'measuringUnit': measuringUnit,
-//       'description': description,
-//       'updatedAt': DateTime.now().toString()
-//     };
+  // static Future<int> updateIngredient(int id, String title,
+  //     MeasuringUnit measuringUnit, String? description) async {
+  //   final db = await DatabaseHelper.db();
 
-//     final result =
-//         await db.update('ingredients', data, where: "id = ?", whereArgs: [id]);
-//     return result;
-//   }
+  //   final data = {
+  //     'title': title,
+  //     'measuringUnit': measuringUnit,
+  //     'description': description,
+  //     'updatedAt': DateTime.now().toString()
+  //   };
 
-//   static Future<void> delete(int id) async {
-//     final db = await DatabaseHelper.db();
-//     try {
-//       await db.delete("recipes", where: "id = ?", whereArgs: [id]);
-//     } catch (err) {
-//       debugPrint("Something went wrong when deleting a recipe: $err");
-//     }
-//     RecipeIngredientsMapRepository.deleteIngredientsOfRecipeIdMapping(id);
-//   }
+  //   final result =
+  //       await db.update('ingredients', data, where: "id = ?", whereArgs: [id]);
+  //   return result;
+  // }
 
-//   static Future<void> deleteAll() async {
-//     final db = await DatabaseHelper.db();
-//     try {
-//       await db.delete("recipes");
-//       await db.delete("recipe_ingredient_map");
-//     } catch (err) {
-//       debugPrint("Something went wrong when deleting an item: $err");
-//     }
-//   }
+  // static Future<void> delete(int id) async {
+  //   final db = await DatabaseHelper.db();
+  //   try {
+  //     await db.delete("recipes", where: "id = ?", whereArgs: [id]);
+  //   } catch (err) {
+  //     debugPrint("Something went wrong when deleting a recipe: $err");
+  //   }
+  //   RecipeIngredientsMapRepository.deleteIngredientsOfRecipeIdMapping(id);
+  // }
 
-//   static Recipe toRecipe(Map<String, dynamic> recipe,
-//       Set<QuantifiedIngredient> quantifiedIngredients) {
-//     int id = recipe['id'];
-//     String name = recipe['name'];
-//     int sampleSize = recipe['sampleSize'];
-//     return Recipe.withID(
-//       id,
-//       name,
-//       sampleSize,
-//       quantifiedIngredients,
-//     );
-//   }
-// }
+  // static Future<void> deleteAll() async {
+  //   final db = await DatabaseHelper.db();
+  //   try {
+  //     await db.delete("recipes");
+  //     await db.delete("recipe_ingredient_map");
+  //   } catch (err) {
+  //     debugPrint("Something went wrong when deleting an item: $err");
+  //   }
+  // }
+
+  static Estimation toEstimation(
+      Map<String, dynamic> estimate, List<Recipe> recipes) {
+    int id = estimate['id'];
+    String name = estimate['name'];
+    int sampleSize = estimate['sampleSize'];
+    bool favourite = estimate['favourite'] == 1;
+    DateTime? updatedAt = DateTime.parse(estimate['updatedAt']);
+    return Estimation.withID(
+        id, name, sampleSize, favourite, recipes, updatedAt);
+  }
+}

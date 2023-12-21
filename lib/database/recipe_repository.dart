@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:wing_cook/database/db_helper.dart';
 import 'package:wing_cook/database/ingredients_repository.dart';
 import 'package:wing_cook/database/recipe_ingredients_map_repository.dart';
 import 'package:wing_cook/model/ingredient.dart';
 import 'package:wing_cook/model/recipe.dart';
+
+final recipeRepositoryProvider = Provider((ref) => RecipesRepository());
 
 class RecipesRepository {
   static Future<Recipe> save(Recipe recipe) async {
@@ -37,6 +40,13 @@ class RecipesRepository {
   }
 
   static Future<List<Recipe>> getAll() async {
+    final db = await DatabaseHelper.db();
+    List<Map<String, dynamic>> recipes =
+        await db.query('recipes', orderBy: "id");
+    return _getListOfRecipe(recipes);
+  }
+
+  Future<List<Recipe>> getAll2() async {
     final db = await DatabaseHelper.db();
     List<Map<String, dynamic>> recipes =
         await db.query('recipes', orderBy: "id");

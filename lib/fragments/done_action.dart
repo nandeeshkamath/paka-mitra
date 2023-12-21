@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wing_cook/constants/app_theme.dart';
 
 class DoneAction extends StatelessWidget {
-  const DoneAction({Key? key, required this.title, required this.onPressed})
-      : super(key: key);
+  const DoneAction({super.key, required this.title, required this.onPressed});
   final String title;
   final VoidCallback onPressed;
 

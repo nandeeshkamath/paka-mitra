@@ -41,7 +41,6 @@ class RecipeForEstimation {
   // int id = 0;
   // String? name;
   TextEditingController nameController = TextEditingController();
-  String? error;
   Recipe? recipe;
 
   RecipeForEstimation(this.index);

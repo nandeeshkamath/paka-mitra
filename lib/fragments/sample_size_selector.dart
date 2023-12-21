@@ -3,12 +3,12 @@ import 'package:wing_cook/constants/app_theme.dart';
 
 class SampleSizeSelector extends StatefulWidget {
   const SampleSizeSelector({
-    Key? key,
+    super.key,
     required this.samples,
     required this.defaultSample,
     required this.onChanged,
     this.toolTip,
-  }) : super(key: key);
+  });
   final String? toolTip;
   final Set<int> samples;
   final int defaultSample;

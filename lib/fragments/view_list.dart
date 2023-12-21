@@ -4,7 +4,7 @@ import 'package:wing_cook/constants/app_theme.dart';
 
 class ViewList extends StatefulWidget {
   const ViewList({
-    Key? key,
+    super.key,
     required this.items,
     // required this.onDelete,
     required this.getTitle,
@@ -12,7 +12,7 @@ class ViewList extends StatefulWidget {
     required this.getDescription,
     this.physics,
     required this.onTap,
-  }) : super(key: key);
+  });
   final Future<List> items;
   final ScrollPhysics? physics;
   // final Future<bool> Function(int? id) onDelete;

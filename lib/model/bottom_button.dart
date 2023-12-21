@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wing_cook/constants/app_theme.dart';
 
 class BottomButton extends StatelessWidget {
-  const BottomButton({Key? key, required this.title, required this.onPressed})
-      : super(key: key);
+  const BottomButton({super.key, required this.title, required this.onPressed});
   final VoidCallback onPressed;
   final String title;
 

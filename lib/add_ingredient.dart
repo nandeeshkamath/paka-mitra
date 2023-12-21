@@ -1,41 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wing_cook/constants/app_theme.dart';
 import 'package:wing_cook/database/ingredients_repository.dart';
 import 'package:wing_cook/database/recipe_repository.dart';
 import 'package:wing_cook/model/bottom_button.dart';
 import 'package:wing_cook/model/ingredient.dart';
 
-class AddIngredient extends StatefulWidget {
-  const AddIngredient({
-    super.key,
-    this.name,
-    this.description,
-    this.unit,
-    this.id,
-    this.favourite,
-  });
-  final String? name;
-  final MeasuringUnit? unit;
-  final String? description;
-  final int? id;
-  final bool? favourite;
+final ingredientProvider = StateProvider.autoDispose
+    .family<Ingredient, Ingredient?>(
+        (ref, initialValue) => initialValue ?? Ingredient.withOptional());
 
-  @override
-  State<StatefulWidget> createState() {
-    return _AddIngredient();
-  }
-}
+class AddIngredient extends ConsumerWidget {
+  AddIngredient({super.key, this.existing});
+  final Ingredient? existing;
 
-class _AddIngredient extends State<AddIngredient> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameConstroller = TextEditingController();
-  final _descriptionController = TextEditingController();
-  bool _favourite = false;
-  MeasuringUnit _measuringUnit = MeasuringUnit.kilogram;
-  int _id = 0;
+  final GlobalKey<FormState> formKey = GlobalKey();
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
 
   Future<void> addIngredient(Ingredient ingredient) async {
-    if (_id != 0) {
+    if (ingredient.id != 0) {
       await IngredientsRepository.updateIngredient(ingredient);
     } else {
       await IngredientsRepository.saveIngredient(ingredient);
@@ -43,29 +27,16 @@ class _AddIngredient extends State<AddIngredient> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.name != null) {
-      _nameConstroller.text = widget.name!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    Ingredient data = ref.watch(ingredientProvider(existing));
+    if (data.name.isNotEmpty) {
+      nameController.text = data.name;
     }
-    if (widget.description != null) {
-      _descriptionController.text = widget.description!;
+    if (data.description?.isNotEmpty == true) {
+      descriptionController.text = data.description!;
     }
-    if (widget.unit != null) {
-      _measuringUnit = widget.unit!;
-    }
-    if (widget.id != null) {
-      _id = widget.id!;
-    }
-    if (widget.favourite != null) {
-      _favourite = widget.favourite!;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     String bottomButtonTitle;
-    if (_id == 0) {
+    if (data.id == 0) {
       bottomButtonTitle = 'Add';
     } else {
       bottomButtonTitle = 'Update';
@@ -81,7 +52,7 @@ class _AddIngredient extends State<AddIngredient> {
               onPressed: () async {
                 final recipes =
                     await RecipesRepository.getRecipesContainingIngredientId(
-                        _id);
+                        data.id);
                 final recipeNames = recipes.map((e) => e.name).toList();
                 if (recipeNames.isNotEmpty) {
                   // ignore: use_build_context_synchronously
@@ -124,7 +95,7 @@ class _AddIngredient extends State<AddIngredient> {
                     ),
                   );
                 } else {
-                  IngredientsRepository.deleteIngredient(_id);
+                  IngredientsRepository.deleteIngredient(data.id);
                   // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                 }
@@ -143,7 +114,7 @@ class _AddIngredient extends State<AddIngredient> {
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Form(
-                key: _formKey,
+                key: formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -151,7 +122,12 @@ class _AddIngredient extends State<AddIngredient> {
                       padding: EdgeInsets.symmetric(vertical: 5),
                     ),
                     TextFormField(
-                      controller: _nameConstroller,
+                      controller: nameController,
+                      onChanged: (value) {
+                        ref
+                            .read(ingredientProvider(existing).notifier)
+                            .update((state) => state.copyWith(name: value));
+                      },
                       keyboardType: TextInputType.name,
                       style: const TextStyle(
                         fontSize: 24,
@@ -163,42 +139,47 @@ class _AddIngredient extends State<AddIngredient> {
                           color: primary,
                         ),
                         border: InputBorder.none,
-                        suffix: SizedBox(
-                          width: 40,
-                          child: PopupMenuButton(
-                            initialValue: _measuringUnit.toString(),
-                            offset: const Offset(0, 45),
-                            tooltip: 'Unit scale',
-                            onSelected: (value) {
-                              setState(() {
-                                _measuringUnit = toMeasuringUnit(value);
-                              });
-                            },
-                            itemBuilder: (BuildContext context) {
-                              return MeasuringUnit.values
-                                  .map((MeasuringUnit choice) {
-                                return PopupMenuItem<String>(
-                                  value: choice.value,
-                                  child: Text(choice.value),
-                                );
-                              }).toList();
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: Colors.black12),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Text(
-                                  _measuringUnit.abbr,
-                                  style: const TextStyle(fontSize: 16),
+                        suffix: Visibility(
+                            visible: nameController.text.isNotEmpty,
+                            child: SizedBox(
+                              width: 40,
+                              child: PopupMenuButton(
+                                initialValue: data.measuringUnit.toString(),
+                                offset: const Offset(0, 45),
+                                tooltip: 'Unit scale',
+                                onSelected: (value) {
+                                  ref
+                                      .read(
+                                          ingredientProvider(existing).notifier)
+                                      .update((state) => state.copyWith(
+                                          measuringUnit:
+                                              toMeasuringUnit(value)));
+                                },
+                                itemBuilder: (BuildContext context) {
+                                  return MeasuringUnit.values
+                                      .map((MeasuringUnit choice) {
+                                    return PopupMenuItem<String>(
+                                      value: choice.value,
+                                      child: Text(choice.value),
+                                    );
+                                  }).toList();
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(color: Colors.black12),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: Text(
+                                      data.measuringUnit.abbr,
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ),
+                            )),
                       ),
 
                       // The validator receives the text that the user has entered.
@@ -213,7 +194,13 @@ class _AddIngredient extends State<AddIngredient> {
                       height: MediaQuery.sizeOf(context).height * 0.4,
                       padding: const EdgeInsets.only(top: 20),
                       child: TextFormField(
-                        controller: _descriptionController,
+                        controller: descriptionController,
+                        onChanged: (value) {
+                          ref
+                              .read(ingredientProvider(existing).notifier)
+                              .update((state) =>
+                                  state.copyWith(description: value));
+                        },
                         keyboardType: TextInputType.name,
                         maxLines: null,
                         decoration: const InputDecoration(
@@ -238,7 +225,7 @@ class _AddIngredient extends State<AddIngredient> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Visibility(
-                    visible: _id != 0,
+                    visible: data.id != 0,
                     child: Container(
                       // elevation: 6,
                       decoration: BoxDecoration(
@@ -247,16 +234,21 @@ class _AddIngredient extends State<AddIngredient> {
                       ),
                       child: IconButton(
                         onPressed: () {
-                          setState(() {
-                            _favourite = !_favourite;
-                          });
+                          final oldState =
+                              ref.read(ingredientProvider(existing));
+                          ref
+                              .read(ingredientProvider(existing).notifier)
+                              .update((state) => state.copyWith(
+                                  favourite: !oldState.favourite));
                         },
                         style: const ButtonStyle(
                           fixedSize: MaterialStatePropertyAll(Size(60, 60)),
                           splashFactory: NoSplash.splashFactory,
                         ),
                         icon: Icon(
-                          _favourite ? Icons.favorite : Icons.favorite_border,
+                          data.favourite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
                           color: secondary,
                           size: 35,
                         ),
@@ -269,28 +261,20 @@ class _AddIngredient extends State<AddIngredient> {
                   BottomButton(
                     title: bottomButtonTitle,
                     onPressed: () async {
-                      if (!_formKey.currentState!.validate()) {
+                      if (!formKey.currentState!.validate()) {
                         return;
                       }
-                      IngredientsRepository.containsIngredient(
-                              _nameConstroller.text)
+                      IngredientsRepository.containsIngredient(data.name)
                           .then((isDuplicate) {
-                        if (isDuplicate && _id == 0) {
+                        if (isDuplicate && data.id == 0) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text('Name already exists')),
                           );
                           return;
                         }
-                        addIngredient(
-                          Ingredient.withID(
-                            _id,
-                            _nameConstroller.text,
-                            _measuringUnit,
-                            _descriptionController.text,
-                            _favourite,
-                          ),
-                        ).then((value) => Navigator.pop(context));
+                        addIngredient(data)
+                            .then((value) => Navigator.pop(context));
                       });
                     },
                   ),

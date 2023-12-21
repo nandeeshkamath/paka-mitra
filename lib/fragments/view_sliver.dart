@@ -6,7 +6,7 @@ import 'package:wing_cook/fragments/search_box.dart';
 
 class ViewScrollView extends StatefulWidget {
   const ViewScrollView({
-    Key? key,
+    super.key,
     required this.title,
     required this.onAddPressed,
     required this.onSearchTap,
@@ -20,7 +20,7 @@ class ViewScrollView extends StatefulWidget {
     required this.onSort,
     required this.filterFunctions,
     required this.onFilter,
-  }) : super(key: key);
+  });
   final String title;
   final Future<List> items;
 
